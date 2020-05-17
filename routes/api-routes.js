@@ -50,13 +50,14 @@ router.route('/posts/:post_id')
     .delete(postController.delete);
 
 router.route('/exams')
-    .get(postController.index)
-    .post(postController.new);
-router.route('/exams/:post_id')
-    .get(postController.view)
-    .patch(postController.update)
-    .put(postController.update)
-    .delete(postController.delete);
+    .get(examController.index)
+    .post(examController.new);
+router.route('/exams/:exam_id')
+    .get(examController.view)
+    .post(examController.importParticipants)
+    .patch(examController.update)
+    .put(examController.update)
+    .delete(examController.delete);
 	
 // Export API routes
 module.exports = router;

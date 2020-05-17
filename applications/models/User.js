@@ -18,7 +18,7 @@ var userSchema = mongoose.Schema({
     },
     isAdmin: Boolean,
     status:Boolean,
-    metas:[],
+    metas:{},
     create_date: {
         type: Date,
         default: Date.now

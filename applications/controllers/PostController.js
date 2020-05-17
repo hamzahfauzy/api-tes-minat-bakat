@@ -1,5 +1,12 @@
 // Import contact model
 Post = require('./../models/Post');
+Category = require('./../models/Category');
+var mv = require('mv');
+var path = require('path');
+var appDir = path.dirname(require.main.filename);
+var formidable = require('formidable')
+const readXlsxFile = require('read-excel-file/node')
+
 // Handle index actions
 exports.index = function (req, res) {
     Post.get(function (err, posts) {
@@ -33,6 +40,64 @@ exports.new = function (req, res) {
             data: post
         });
     });
+};
+
+exports.importPosts = function (req, res) {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+        var oldpath = files.filetoupload.path;
+        var newpath = appDir + "/uploads/" + files.filetoupload.name
+        mv(oldpath, newpath, function (err) {
+            readXlsxFile(newpath).then((rows) => {
+                // Remove Header ROW
+                rows.shift();
+
+                console.log(rows);
+                var posts = []
+                rows.forEach(async (val) => {
+                    var category = await Category.find({name:val[2]})
+                    if(!category)
+                    {
+                        var category = new Category()
+                        category.name = val[2]
+                        category.description = val[2]
+                        category.save()
+                    }
+
+                    var subcategory = await Category.find({name:val[3]})
+                    if(!subcategory)
+                    {
+                        var subcategory = new Category()
+                        subcategory.name = val[3]
+                        subcategory.description = val[3]
+                        subcategory.parent = category
+                        subcategory.save()
+                    }
+
+                    var post = new Post()
+                    post.title = 'Soal Exam'
+                    post.description = val[1]
+                    post.category = subcategory
+                    post.type_as = 'post'
+                    post.save()
+
+                    for(i=1;i<=4;i++){
+                        var answer = new Post()
+                        answer.title = 'Jawaban Exam'
+                        answer.description = val[3+i]
+                        answer.parent = post
+                        answer.type_as = i == 1 ? 'answer correct' : 'answer'
+                        answer.save()
+                    }
+                })
+                res.json({
+                    message: 'Exam Info updated',
+                    data: exam
+                });
+            })
+        })
+    })
+    
 };
 
 // Handle view user info

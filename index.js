@@ -1,7 +1,11 @@
 // Import express
 let express = require('express')
+
+var cors = require('cors')
 // Initialize the app
 let app = express();
+
+app.use(cors())
 
 const config = require("config");
 

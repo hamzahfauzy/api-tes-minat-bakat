@@ -45,6 +45,6 @@ var port = process.env.PORT || 8080;
 app.get('/', (req, res) => res.send('Hello World with Express'));
 
 // Launch app to listen to specified port
-app.listen(port, function () {
+app.listen(port, '0.0.0.0', function () {
      console.log("Running Minat Bakat API on port " + port);
 });

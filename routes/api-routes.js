@@ -43,6 +43,8 @@ router.route('/categories/:category_id')
 router.route('/posts')
     .get(postController.index)
     .post(postController.new);
+router.post('/posts/import',postController.importPosts)
+router.get('/posts/type/:type_as',postController.viewByType)
 router.route('/posts/:post_id')
     .get(postController.view)
     .patch(postController.update)

@@ -1,4 +1,5 @@
 // Import contact model
+var mongoose = require('mongoose');
 Post = require('./../models/Post');
 Category = require('./../models/Category');
 var mv = require('mv');
@@ -42,62 +43,59 @@ exports.new = function (req, res) {
     });
 };
 
-exports.importPosts = function (req, res) {
+exports.importPosts = async function (req, res) {
     var form = new formidable.IncomingForm();
-    form.parse(req, function (err, fields, files) {
-        var oldpath = files.filetoupload.path;
-        var newpath = appDir + "/uploads/" + files.filetoupload.name
-        mv(oldpath, newpath, function (err) {
-            readXlsxFile(newpath).then((rows) => {
-                // Remove Header ROW
-                rows.shift();
+    var oldpath = ""
+    var newpath = ""
+    form.parse(req, async function (err, fields, files) {
+        oldpath = files.filetoupload.path;
+        newpath = appDir + "/uploads/" + files.filetoupload.name
+        mv(oldpath, newpath, async function (err) {
+            var rows = await readXlsxFile(newpath)
+            // rows.shift()
+            var categories = []
+            var subcategories = []
+            for(i=1;i<rows.length;i++)
+            {
+                var val = rows[i]
+                var category = await Category.findOneAndUpdate({name:val[1]},{
+                    name:val[1],
+                    category:val[1],
+                },{new:true,upsert:true})
+                // console.log('category')
 
-                console.log(rows);
-                var posts = []
-                rows.forEach(async (val) => {
-                    var category = await Category.find({name:val[2]})
-                    if(!category)
-                    {
-                        var category = new Category()
-                        category.name = val[2]
-                        category.description = val[2]
-                        category.save()
-                    }
+                var subcategory = await Category.findOneAndUpdate({name:val[2]},{
+                    name:val[2],
+                    category:val[2],
+                    parent:category
+                },{new:true,upsert:true})
+                // console.log('subcategory')
 
-                    var subcategory = await Category.find({name:val[3]})
-                    if(!subcategory)
-                    {
-                        var subcategory = new Category()
-                        subcategory.name = val[3]
-                        subcategory.description = val[3]
-                        subcategory.parent = category
-                        subcategory.save()
-                    }
-
-                    var post = new Post()
-                    post.title = 'Soal Exam'
-                    post.description = val[1]
-                    post.category = subcategory
-                    post.type_as = 'post'
-                    post.save()
-
-                    for(i=1;i<=4;i++){
-                        var answer = new Post()
-                        answer.title = 'Jawaban Exam'
-                        answer.description = val[3+i]
-                        answer.parent = post
-                        answer.type_as = i == 1 ? 'answer correct' : 'answer'
-                        answer.save()
-                    }
+                const post = new Post({
+                    title:'Soal Exam '+i,
+                    description: val[0],
+                    category: subcategory,
+                    type_as: 'question'
                 })
-                res.json({
-                    message: 'Exam Info updated',
-                    data: exam
-                });
+                let postSave = await post.save()
+                // console.log('post')
+
+                for(idx=1;idx<=4;idx++){
+                    const answer = new Post({
+                        title:'Jawaban '+idx+' Soal '+i,
+                        description: val[2+idx],
+                        parent: postSave,
+                        type_as: idx == 1 ? 'correct answer' : 'answer'
+                    })
+                    let answerSave = await answer.save()
+                    // console.log('answer')
+                }
+            }
+            res.json({
+                message: 'Post Import success',
             })
-        })
-    })
-    
+        }) 
+    });
 };
 
 // Handle view user info
@@ -108,6 +106,32 @@ exports.view = function (req, res) {
         res.json({
             message: 'Post details loading..',
             data: post
+        });
+    });
+};
+
+exports.viewByType = function (req, res) {
+    Post.find({type_as:req.params.type_as}, async function (err, posts) {
+        if (err)
+            res.send(err);
+
+        var _posts = []
+        // _post.question = post
+
+        if(req.params.type_as == 'question')
+        {
+            for(i=0;i<posts.length;i++)
+            {
+                var post = posts[i]
+                var answers = await Post.find({parent:post})
+                _posts.push({question:post,answers:answers})
+            }
+        }
+        else
+            _posts = posts
+        res.json({
+            message: 'Post details loading..',
+            data: _posts
         });
     });
 };

@@ -18,6 +18,8 @@ var postSchema = mongoose.Schema({
     }
 });
 
+// postSchema.set('toObject', { virtuals: true })
+
 // Export User model
 var Post = module.exports = mongoose.model('posts', postSchema);
 module.exports.get = function (callback, limit) {

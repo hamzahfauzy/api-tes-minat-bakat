@@ -36,3 +36,7 @@ var User = module.exports = mongoose.model('users', userSchema);
 module.exports.get = function (callback, limit) {
     User.find(callback).limit(limit);
 }
+
+module.exports.getParticipant = function (callback, limit) {
+    User.find({$or:[ {isAdmin : { '$exists' : false }}, {isAdmin:false}]},callback).limit(limit);
+}

@@ -9,7 +9,43 @@ var formidable = require('formidable')
 const readXlsxFile = require('read-excel-file/node')
 
 // Handle index actions
-exports.index = function (req, res) {
+exports.index = async function (req, res) {
+    try 
+    {
+        var posts = await Post.find({$and:[ {type_as : {$ne:'answer'}}, {type_as : {$ne:'correct answer'}}]})
+        posts = JSON.stringify(posts)
+        posts = JSON.parse(posts)
+        if(posts)
+        {
+            for(var i = 0; i < posts.length; i++)
+            {
+                var post = posts[i]
+                if(post.type_as == 'question')
+                {
+                    post.answers = await Post.find({'parent._id':new mongoose.Types.ObjectId(post._id)})
+                }
+            }
+            res.json({
+                status: "success",
+                message: "posts retrieved successfully",
+                data: posts,
+                // answers:_answers
+            });
+        }
+        else
+            res.json({
+                status: "error",
+                message: "posts not found",
+            });
+    }
+    catch(err)
+    {
+        res.json({
+            status: "error",
+            message: err.stack,
+        });
+    }
+    return
     Post.get(function (err, posts) {
         if (err) {
             res.json({
@@ -28,15 +64,15 @@ exports.index = function (req, res) {
 // Handle create user actions
 exports.new = function (req, res) {
     var post = new Post();
-    post.title = req.body.name ? req.body.name : post.name;
+    post.title = req.body.title;
     post.description = req.body.description;
     post.parent = req.body.parent ? req.body.parent : '';
     post.category = req.body.category;
     post.type_as = req.body.type_as;
     post.save(function (err) {
-        // if (err)
-        //     res.json(err);
-		res.json({
+        if (err)
+            res.json(err);
+        res.json({
             message: 'New post created!',
             data: post
         });
@@ -110,6 +146,17 @@ exports.view = function (req, res) {
     });
 };
 
+exports.viewParent = function (req, res) {
+    Post.find({'parent._id':new mongoose.Types.ObjectId(req.params.post_id)}, function (err, posts) {
+        if (err)
+            res.send(err);
+        res.json({
+            message: 'Post details loading..',
+            data: posts
+        });
+    });
+};
+
 exports.viewByType = function (req, res) {
     Post.find({type_as:req.params.type_as}, async function (err, posts) {
         if (err)
@@ -141,13 +188,13 @@ exports.update = function (req, res) {
     Post.findById(req.params.post_id, function (err, post) {
         if (err)
             res.send(err);
-		post.title = req.body.name ? req.body.name : post.name;
+        post.title = req.body.title;
         post.description = req.body.description;
         post.parent = req.body.parent ? req.body.parent : '';
         post.category = req.body.category;
         post.type_as = req.body.type_as;
-		
-		// save the user and check for errors
+        
+        // save the user and check for errors
         post.save(function (err) {
             if (err)
                 res.json(err);
@@ -166,7 +213,7 @@ exports.delete = function (req, res) {
     }, function (err, contact) {
         if (err)
             res.send(err);
-		res.json({
+        res.json({
             status: "success",
             message: 'Pot deleted'
         });

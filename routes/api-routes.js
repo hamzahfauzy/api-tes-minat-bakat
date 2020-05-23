@@ -18,6 +18,7 @@ var examController = require('./../applications/controllers/ExamController');
 router.post('/login', userController.login)
 router.post('/register-admin', userController.register)
 
+
 router.use(admin)
 
 router.route('/users')
@@ -25,7 +26,7 @@ router.route('/users')
     .post(userController.new);
 router.route('/users/:user_id')
     .get(userController.view)
-    .patch(userController.update)
+    // .patch(userController.update)
     .put(userController.update)
     .delete(userController.delete);
 
@@ -36,7 +37,7 @@ router.route('/categories/parent/:category_id')
     .get(categoryController.viewParent)
 router.route('/categories/:category_id')
     .get(categoryController.view)
-    .patch(categoryController.update)
+    // .patch(categoryController.update)
     .put(categoryController.update)
     .delete(categoryController.delete);
 
@@ -45,21 +46,26 @@ router.route('/posts')
     .post(postController.new);
 router.post('/posts/import',postController.importPosts)
 router.get('/posts/type/:type_as',postController.viewByType)
+router.route('/posts/parent/:post_id')
+    .get(postController.viewParent)
 router.route('/posts/:post_id')
-    .get(postController.view)
-    .patch(postController.update)
+    .get(postController.view) 
+    // .patch(postController.update)
     .put(postController.update)
     .delete(postController.delete);
 
 router.route('/exams')
     .get(examController.index)
     .post(examController.new);
+router.post('/exams/:exam_id/add-sequence',examController.addSequence)
+router.post('/exams/:sequence_id/update-order',examController.updateOrder)
+router.post('/exams/:sequence_id/update-countdown',examController.updateCountdown)
 router.route('/exams/:exam_id')
     .get(examController.view)
     .post(examController.importParticipants)
-    .patch(examController.update)
+    // .patch(examController.update)
     .put(examController.update)
     .delete(examController.delete);
-	
+    
 // Export API routes
 module.exports = router;

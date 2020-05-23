@@ -1,20 +1,50 @@
 // Import contact model
 User = require('./../models/User');
 // Handle index actions
-exports.index = function (req, res) {
-    User.get(function (err, users) {
-        if (err) {
+exports.index = async function (req, res) {
+    try 
+    {
+        let users = await User.find({$or:[ {isAdmin : { '$exists' : false }}, {isAdmin:false}]})
+        if(users)
+            res.json({
+                status: "success",
+                message: "users retrieved successfully",
+                data: await users
+            });
+        else
             res.json({
                 status: "error",
-                message: err,
+                message: "user not found",
             });
-        }
+    }
+    catch(err)
+    {
         res.json({
-            status: "success",
-            message: "users retrieved successfully",
-            data: users
+            status: "error",
+            message: err.stack,
         });
-    });
+    }
+    return
+    
+    
+    // User.getParticipant(function (err, users) {
+    //     if (err) {
+    //         res.json({
+    //             status: "error",
+    //             message: err,
+    //         });
+    //     }
+    //     res.json({
+    //         status: "success",
+    //         message: "users retrieved successfully",
+    //         data: users
+    //     });
+    // }).catch(e => {
+    //     res.json({
+    //         status: "error",
+    //         message: e,
+    //     });
+    // });
 };
 
 exports.login = async function (req, res) {
@@ -70,7 +100,7 @@ exports.new = function (req, res) {
     user.save(function (err) {
         // if (err)
         //     res.json(err);
-		res.json({
+        res.json({
             message: 'New user created!',
             data: user
         });
@@ -94,11 +124,11 @@ exports.update = function (req, res) {
     User.findById(req.params.user_id, function (err, user) {
         if (err)
             res.send(err);
-		user.name = req.body.name ? req.body.name : user.name;
+        user.name = req.body.name ? req.body.name : user.name;
         user.username = req.body.username;
         user.password = req.body.password;
-		
-		// save the user and check for errors
+        
+        // save the user and check for errors
         user.save(function (err) {
             if (err)
                 res.json(err);
@@ -117,7 +147,7 @@ exports.delete = function (req, res) {
     }, function (err, contact) {
         if (err)
             res.send(err);
-		res.json({
+        res.json({
             status: "success",
             message: 'User deleted'
         });

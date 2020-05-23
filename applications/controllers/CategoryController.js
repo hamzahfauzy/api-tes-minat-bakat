@@ -30,7 +30,7 @@ exports.new = async function (req, res) {
     category.save(function (err) {
         // if (err)
         //     res.json(err);
-		res.json({
+        res.json({
             message: 'New category created!',
             data: category
         });
@@ -65,11 +65,11 @@ exports.update = function (req, res) {
     Category.findById(req.params.category_id, function (err, category) {
         if (err)
             res.send(err);
-		category.name = req.body.name ? req.body.name : category.name;
+        category.name = req.body.name ? req.body.name : category.name;
         category.description = req.body.description;
         category.parent = req.body.parent ? req.body.parent : '';
-		
-		// save the user and check for errors
+        
+        // save the user and check for errors
         category.save(function (err) {
             if (err)
                 res.json(err);
@@ -88,7 +88,7 @@ exports.delete = function (req, res) {
     }, function (err, contact) {
         if (err)
             res.send(err);
-		res.json({
+        res.json({
             status: "success",
             message: 'Category deleted'
         });

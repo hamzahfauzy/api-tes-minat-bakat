@@ -1,6 +1,8 @@
 // Import contact model
 Exam = require('./../models/Exam')
 User = require('./../models/User')
+Post = require('./../models/Post')
+var mongoose = require('mongoose');
 var mv = require('mv');
 var path = require('path');
 var appDir = path.dirname(require.main.filename);
@@ -31,7 +33,7 @@ exports.new = function (req, res) {
     exam.save(function (err) {
         // if (err)
         //     res.json(err);
-		res.json({
+        res.json({
             message: 'New exam created!',
             data: exam
         });
@@ -54,7 +56,7 @@ exports.update = function (req, res) {
     Exam.findById(req.params.exam_id, function (err, exam) {
         if (err)
             res.send(err);
-		exam.title = req.body.title
+        exam.title = req.body.title
         exam.save(function (err) {
             if (err)
                 res.json(err);
@@ -72,35 +74,35 @@ exports.importParticipants = function (req, res) {
         var oldpath = files.filetoupload.path;
         var newpath = appDir + "/uploads/" + files.filetoupload.name
         mv(oldpath, newpath, function (err) {
-            readXlsxFile(newpath).then((rows) => {
+            readXlsxFile(newpath).then(async (rows) => {
                 // Remove Header ROW
-                rows.shift();
+                // rows.shift();
 
-                console.log(rows);
                 var participants = []
-                rows.forEach(async (val) => {
+                for(var i=1;i<rows.length;i++)
+                {
+                    var val = rows[i]
                     participants.push({
                         user:{
                             nis:val[1],
                             name:val[2],
-                            birthdate:val[3]
+                            birthdate:val[3],
+                            gender:val[4]
                         },
                     })
-                    var user = await User.find({username:val[1]})
-                    if(!user)
-                    {
-                        var user = new User()
-                        user.name = val[2]
-                        user.username = val[1]
-                        user.password = val[3]
-                        user.metas = {
-                            exam_id:req.params.exam_id,
+                    var user = await User.findOneAndUpdate({username:val[1]},{
+                        name: val[2],
+                        username: val[1],
+                        password: val[3],
+                        isAdmin: false,
+                        status: true,
+                        metas: {
+                            exam_id:fields.exam_id,
                             gender:val[4]
                         }
-                        user.save()
-                    }
-                })
-                Exam.findById(req.params.exam_id, function (err, exam) {
+                    },{new:true,upsert:true})
+                }
+                Exam.findById(fields.exam_id, function (err, exam) {
                     if (err)
                         res.send(err);
                     exam.participants = participants
@@ -119,13 +121,93 @@ exports.importParticipants = function (req, res) {
     
 };
 
+exports.updateOrder = (req,res) => {
+    Exam.findOne({'sequences._id':req.params.sequence_id.toString()}, (err, exam) => {
+        var sequences = JSON.stringify(exam.sequences)
+        sequences = JSON.parse(sequences)
+        sequences.forEach(val => {
+            if(val._id == req.params.sequence_id.toString())
+                val.order = req.body.order
+        })
+        exam.sequences = sequences
+        exam.save(function (err) {
+            if (err)
+                res.json(err);
+            res.json({
+                message: 'Exam Info updated',
+                data: exam
+            });
+        });
+    });
+    // Exam.find({'sequences._id':req.params.sequence_id, async function (err, exam) {
+    //     if (err)
+    //         res.send(err);
+    //     exam.sequence.order = req.body.order
+    //     exam.save(function (err) {
+    //         if (err)
+    //             res.json(err);
+    //         res.json({
+    //             message: 'Exam Info updated',
+    //             data: exam
+    //         });
+    //     });
+    // });
+}
+exports.updateCountdown = (req,res) => {
+    Exam.findOne({'sequences._id':req.params.sequence_id.toString()}, (err, exam) => {
+        var sequences = JSON.stringify(exam.sequences)
+        sequences = JSON.parse(sequences)
+        sequences.forEach(val => {
+            if(val._id == req.params.sequence_id.toString())
+                val.countdown = req.body.countdown
+        })
+        exam.sequences = sequences
+        exam.save(function (err) {
+            if (err)
+                res.json(err);
+            res.json({
+                message: 'Exam Info updated',
+                data: exam
+            });
+        });
+    });
+}
+
+exports.addSequence = async (req,res) => { 
+    Exam.findById(req.params.exam_id, async function (err, exam) {
+        if (err)
+            res.send(err);
+        var sequences = req.body
+        var posts = []
+        if(sequences.content_type == 'category')
+            posts = await Post.find({'category._id':new mongoose.Types.ObjectId(sequences.content)})
+        else
+            posts = await Post.findById(new mongoose.Types.ObjectId(sequences.content))
+        var sequence = {
+            title:sequences.title,
+            contents:posts,
+            order:sequences.order,
+            countdown:sequences.timeout,
+        }
+        exam.sequences.push(sequence)
+        exam.save(function (err) {
+            if (err)
+                res.json(err);
+            res.json({
+                message: 'Exam Info updated',
+                data: exam
+            });
+        });
+    });
+}
+
 exports.delete = function (req, res) {
     Exam.remove({
         _id: req.params.exam_id
     }, function (err, contact) {
         if (err)
             res.send(err);
-		res.json({
+        res.json({
             status: "success",
             message: 'Exam deleted'
         });

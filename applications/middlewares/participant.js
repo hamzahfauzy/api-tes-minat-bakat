@@ -14,11 +14,13 @@ module.exports = async function(req, res, next) {
 
         if(!decoded.isAdmin)
         {
-            req.user = decoded;
+            req.user = user;
             next();
         }
         else
-            res.status(403).send("Unauthorized.");
+            res.status(403).json({
+                message:"Unauthorized."
+            });
     } catch (ex) {
         //if invalid token
         res.status(400).send("Invalid token.");

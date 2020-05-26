@@ -82,15 +82,11 @@ exports.importParticipants = function (req, res) {
                 for(var i=1;i<rows.length;i++)
                 {
                     var val = rows[i]
-                    participants.push({
-                        user:{
-                            nis:val[1],
-                            name:val[2],
-                            birthdate:val[3],
-                            gender:val[4]
-                        },
-                    })
-                    var user = await User.findOneAndUpdate({username:val[1]},{
+                    var user = await User.findOneAndUpdate({
+                        name: val[2],
+                        username:val[1],
+                        password: val[3],
+                    },{
                         name: val[2],
                         username: val[1],
                         password: val[3],
@@ -101,6 +97,15 @@ exports.importParticipants = function (req, res) {
                             gender:val[4]
                         }
                     },{new:true,upsert:true})
+                    participants.push({
+                        user:{
+                            _id:user._id,
+                            nis:val[1],
+                            name:val[2],
+                            birthdate:val[3],
+                            gender:val[4]
+                        },
+                    })
                 }
                 Exam.findById(fields.exam_id, function (err, exam) {
                     if (err)
@@ -213,3 +218,55 @@ exports.delete = function (req, res) {
         });
     });
 };
+
+exports.startExam = async (req, res) => {
+    var user = await User.findById(req.user._id)
+    var metas = user.metas
+    metas.cita_cita = req.body.cita_cita
+    metas.hoby      = req.body.hoby
+    metas.jurusan   = req.body.jurusan
+    var userUpdate = await user.save({
+        metas:metas
+    })
+    var exam = await Exam.findById(req.body.exam_id).populate('participants')
+    var sequences = []
+    for(var i=0;i<exam.sequences.length;i++)
+    {
+        var sequence = exam.sequences[i]
+        sequence = JSON.stringify(sequence)
+        sequence = JSON.parse(sequence)
+        var contents = []
+        for(var j=0;j<sequence.contents.length;j++)
+        {
+            var content = sequence.contents[j]
+            var sub_contents = content.type_as == "question" ? await Post.find({'parent._id':new mongoose.Types.ObjectId(content._id)}).select('-type_as') : {}
+            contents.push({
+                parent:content,
+                childs:sub_contents
+            })
+        }
+        sequence.contents = contents
+        sequences.push(sequence)
+    }
+    seqeunces = sequences.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+    res.json({
+        status: "success",
+        message: 'Exam start',
+        user:userUpdate,
+        data:sequences
+    });
+}
+
+exports.sendAnswer = (req, res) => {
+    res.json({
+        status: "success",
+        message: 'Answer Save'
+    });
+}
+
+exports.finishExam = (req, res) => {
+    res.json({
+        status: "success",
+        message: 'Exam Finished'
+    });
+}

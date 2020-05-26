@@ -2,6 +2,7 @@
 let router = require('express').Router();
 let admin = require("./../applications/middlewares/admin");
 let auth = require("./../applications/middlewares/auth");
+let participant = require("./../applications/middlewares/participant");
 // Set default API response
 router.get('/', function (req, res) {
     res.json({
@@ -18,6 +19,13 @@ var examController = require('./../applications/controllers/ExamController');
 router.post('/login', userController.login)
 router.post('/register-admin', userController.register)
 
+// router.use(auth)
+router.get('/auth-detail', auth, userController.detail)
+
+// router.use(participant)
+router.post('/participant/exam/start',participant, examController.startExam)
+router.post('/participant/exam/send-answer',participant, examController.sendAnswer) // exam_id, question_id, answer_id, user_token
+router.post('/participant/exam/finish',participant, examController.finishExam)
 
 router.use(admin)
 
@@ -66,6 +74,6 @@ router.route('/exams/:exam_id')
     // .patch(examController.update)
     .put(examController.update)
     .delete(examController.delete);
-    
+
 // Export API routes
 module.exports = router;

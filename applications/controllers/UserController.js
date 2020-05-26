@@ -1,5 +1,8 @@
 // Import contact model
 User = require('./../models/User');
+Exam = require('./../models/Exam');
+const jwt = require("jsonwebtoken");
+const config = require("config");
 // Handle index actions
 exports.index = async function (req, res) {
     try 
@@ -65,6 +68,7 @@ exports.login = async function (req, res) {
     res.header("x-auth-token", token).send({
         _id: user._id,
         name: user.name,
+        isAdmin: user.isAdmin,
         token: token,
     });
 };
@@ -117,6 +121,25 @@ exports.view = function (req, res) {
             data: user
         });
     });
+};
+
+// Handle view user info
+exports.detail = async function (req, res) {
+    const token = req.headers["x-access-token"] || req.headers["authorization"];
+    try {
+        //if can verify the token, set req.user and pass to next middleware
+        const decoded = jwt.verify(token, config.get("myprivatekey"));
+        var user = await User.findById(decoded._id)
+        var otherData = user.isAdmin ? {} : await Exam.findById(user.metas.exam_id).populate('participants')
+        res.json({
+            message: 'User details loading..',
+            data: user,
+            otherData:otherData
+        });
+    } catch (ex) {
+        //if invalid token
+        res.status(400).send("Invalid token.");
+    }
 };
 
 // Handle update user info

@@ -30,22 +30,19 @@ exports.new = async function (req, res) {
     var newpath = ""
     form.parse(req, async function (err, fields, files) {
         oldpath = files.filetoupload.path;
-        newpath = appDir + "/uploads/" + files.filetoupload.name
-        mv(oldpath, newpath, async function (err) {
-            var media = new Media();
-            media.name = files.filetoupload.name;
-            media.url = newpath;
-            media.uploaded = '1';
-            
-            media.save(function (err) {
-                // if (err)
-                //     res.json(err);
-                res.json({
-                    message: 'New media created!',
-                    data: media
-                });
-            });
-        }) 
+        for(var i=0;i<files.filetoupload.length;i++)
+        {
+            var _file = files.filetoupload[i]
+            newpath = appDir + "/uploads/" + _file.name
+            mv(oldpath, newpath, async function (err) {
+                var media = new Media();
+                media.name = _file.name;
+                media.url = newpath;
+                media.uploaded = '1';
+                
+                await media.save();
+            }) 
+        }
     });
     
 };

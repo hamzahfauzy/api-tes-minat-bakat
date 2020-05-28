@@ -62,12 +62,14 @@ exports.index = async function (req, res) {
 };
 
 // Handle create user actions
-exports.new = function (req, res) {
+exports.new = async function (req, res) {
     var post = new Post();
     post.title = req.body.title;
     post.description = req.body.description;
-    post.parent = req.body.parent ? req.body.parent : '';
-    post.category = req.body.category ? req.body.category : '';
+    var parent = req.body.parent ? await Post.findById(req.body.parent) : ''
+    var category = req.body.category ? await Category.findById(req.body.category) : ''
+    post.parent = parent;
+    post.category = category;
     post.type_as = req.body.type_as;
     post.save(function (err) {
         if (err)
@@ -184,24 +186,19 @@ exports.viewByType = function (req, res) {
 };
 
 // Handle update user info
-exports.update = function (req, res) {
-    Post.findById(req.params.post_id, function (err, post) {
+exports.update = async function (req, res) {
+    var post = await Post.findById(req.params.post_id)
+    post.title = req.body.title;
+    post.description = req.body.description;
+    var category = req.body.category ? await Category.findById(req.body.category) : post.category
+    post.category = category;
+    post.type_as = req.body.type_as;
+    post.save(function (err) {
         if (err)
-            res.send(err);
-        post.title = req.body.title;
-        post.description = req.body.description;
-        post.parent = req.body.parent ? req.body.parent : post.parent;
-        post.category = req.body.category ? req.body.category : post.category;
-        post.type_as = req.body.type_as;
-        
-        // save the user and check for errors
-        post.save(function (err) {
-            if (err)
-                res.json(err);
-            res.json({
-                message: 'Post Info updated',
-                data: post
-            });
+            res.json(err);
+        res.json({
+            message: 'Post Info updated',
+            data: post
         });
     });
 };

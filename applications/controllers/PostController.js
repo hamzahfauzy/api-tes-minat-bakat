@@ -67,7 +67,7 @@ exports.new = function (req, res) {
     post.title = req.body.title;
     post.description = req.body.description;
     post.parent = req.body.parent ? req.body.parent : '';
-    post.category = req.body.category;
+    post.category = req.body.category ? req.body.category : '';
     post.type_as = req.body.type_as;
     post.save(function (err) {
         if (err)
@@ -190,8 +190,8 @@ exports.update = function (req, res) {
             res.send(err);
         post.title = req.body.title;
         post.description = req.body.description;
-        post.parent = req.body.parent ? req.body.parent : '';
-        post.category = req.body.category;
+        post.parent = req.body.parent ? req.body.parent : post.parent;
+        post.category = req.body.category ? req.body.category : post.category;
         post.type_as = req.body.type_as;
         
         // save the user and check for errors

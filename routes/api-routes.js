@@ -13,6 +13,7 @@ router.get('/', function (req, res) {
 
 var userController = require('./../applications/controllers/UserController');
 var categoryController = require('./../applications/controllers/CategoryController');
+var mediaController = require('./../applications/controllers/MediaController');
 var postController = require('./../applications/controllers/PostController');
 var examController = require('./../applications/controllers/ExamController');
 
@@ -48,6 +49,10 @@ router.route('/categories/:category_id')
     // .patch(categoryController.update)
     .put(categoryController.update)
     .delete(categoryController.delete);
+
+router.route('/media')
+    .get(mediaController.index)
+    .post(mediaController.new);
 
 router.route('/posts')
     .get(postController.index)

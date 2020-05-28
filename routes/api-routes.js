@@ -3,6 +3,7 @@ let router = require('express').Router();
 let admin = require("./../applications/middlewares/admin");
 let auth = require("./../applications/middlewares/auth");
 let participant = require("./../applications/middlewares/participant");
+const path = require("path");
 // Set default API response
 router.get('/', function (req, res) {
     res.json({
@@ -17,6 +18,9 @@ var mediaController = require('./../applications/controllers/MediaController');
 var postController = require('./../applications/controllers/PostController');
 var examController = require('./../applications/controllers/ExamController');
 
+router.get('/uploads/:img', (req, res) => {
+    res.sendFile(path.join(__dirname, "../uploads/"+req.params.img));
+});
 router.post('/login', userController.login)
 router.post('/register-admin', userController.register)
 
@@ -53,6 +57,8 @@ router.route('/categories/:category_id')
 router.route('/media')
     .get(mediaController.index)
     .post(mediaController.new);
+
+router.route('/media/:media_id').delete(mediaController.delete)
 
 router.route('/posts')
     .get(postController.index)

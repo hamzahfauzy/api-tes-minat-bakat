@@ -222,9 +222,12 @@ exports.delete = function (req, res) {
 exports.startExam = async (req, res) => {
     var user = await User.findById(req.user._id)
     var metas = user.metas
-    metas.cita_cita = req.body.cita_cita
-    metas.hoby      = req.body.hoby
-    metas.jurusan   = req.body.jurusan
+    var req_metas = Object.keys(req.body.metas)
+
+    req_metas.forEach(val => {
+        metas[''+val] = req.body.metas[''+val]
+    })
+    
     var userUpdate = await user.save({
         metas:metas
     })

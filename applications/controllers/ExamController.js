@@ -222,10 +222,11 @@ exports.delete = function (req, res) {
 exports.startExam = async (req, res) => {
     var user = await User.findById(req.user._id)
     var metas = user.metas
-    var req_metas = Object.keys(req.body.metas)
+    var req_metas = Object.keys(req.body)
 
     req_metas.forEach(val => {
-        metas[''+val] = req.body.metas[''+val]
+        if(val != 'exam_id')
+            metas[val] = req.body[val].value
     })
     
     var userUpdate = await user.save({

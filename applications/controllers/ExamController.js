@@ -221,17 +221,20 @@ exports.delete = function (req, res) {
 
 exports.startExam = async (req, res) => {
     var user = await User.findById(req.user._id)
-    var metas = user.metas
+    var metas = JSON.stringify(user.metas)
+    metas = JSON.parse(metas)
     var req_metas = Object.keys(req.body)
 
     req_metas.forEach(val => {
-        if(val != 'exam_id')
-            metas[val] = req.body[val].value
+        metas[""+val] = req.body[val]
+    })
+
+    var userUpdate = await User.findOneAndUpdate({
+        _id: req.user._id,
+    },{
+        metas: metas
     })
     
-    var userUpdate = await user.save({
-        metas:metas
-    })
     var exam = await Exam.findById(req.body.exam_id).populate('participants')
     var sequences = []
     for(var i=0;i<exam.sequences.length;i++)
@@ -244,6 +247,7 @@ exports.startExam = async (req, res) => {
         {
             var content = sequence.contents[j]
             var sub_contents = content.type_as == "question" ? await Post.find({'parent._id':new mongoose.Types.ObjectId(content._id)}).select('-type_as') : {}
+            sub_contents = sub_contents.length ? sub_contents.sort(() => Math.random() - 0.5) : {};
             contents.push({
                 parent:content,
                 childs:sub_contents
@@ -261,16 +265,36 @@ exports.startExam = async (req, res) => {
     });
 }
 
-exports.sendAnswer = (req, res) => {
+exports.sendUserSequence = async (req, res) => {
+    var user = await User.findById(req.user._id)
+    var metas = JSON.stringify(user.metas)
+    metas = JSON.parse(metas)
+    metas.sequences = req.body
+    var userUpdate = await User.findOneAndUpdate({
+        _id: req.user._id,
+    },{
+        metas: metas
+    })
     res.json({
         status: "success",
-        message: 'Answer Save'
+        message: 'Sequence Saved',
+        user:userUpdate,
     });
 }
 
-exports.finishExam = (req, res) => {
+exports.finishExam = async (req, res) => {
+    var user = await User.findById(req.user._id)
+    var metas = JSON.stringify(user.metas)
+    metas = JSON.parse(metas)
+    metas.exam_finished = true
+    var userUpdate = await User.findOneAndUpdate({
+        _id: req.user._id,
+    },{
+        metas: metas
+    })
     res.json({
         status: "success",
-        message: 'Exam Finished'
+        message: 'Exam Finished',
+        user:userUpdate,
     });
 }

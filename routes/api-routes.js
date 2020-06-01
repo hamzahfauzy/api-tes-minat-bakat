@@ -29,7 +29,7 @@ router.get('/auth-detail', auth, userController.detail)
 
 // router.use(participant)
 router.post('/participant/exam/start',participant, examController.startExam)
-router.post('/participant/exam/send-answer',participant, examController.sendAnswer) // exam_id, question_id, answer_id, user_token
+router.post('/participant/exam/send-user-sequence',participant, examController.sendUserSequence) // exam_id, question_id, answer_id, user_token
 router.post('/participant/exam/finish',participant, examController.finishExam)
 
 router.use(admin)

@@ -23,6 +23,8 @@ var examSchema = mongoose.Schema({
         order:Number,
         countdown:Number,
     }],
+    start_time:String,
+    end_time:String,
     create_date: {
         type: Date,
         default: Date.now

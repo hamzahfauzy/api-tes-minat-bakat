@@ -30,12 +30,36 @@ exports.index = function (req, res) {
 exports.new = function (req, res) {
     var exam = new Exam();
     exam.title = req.body.title;
+    exam.start_time = req.body.start_time;
+    exam.end_time = req.body.end_time;
     exam.save(function (err) {
         // if (err)
         //     res.json(err);
         res.json({
             message: 'New exam created!',
             data: exam
+        });
+    });
+};
+
+// Handle create user actions
+exports.duplicate = function (req, res) {
+    Exam.findById(req.params.exam_id, function (err, exam) {
+        if (err)
+            res.send(err);
+        var newExam = new Exam(exam)
+        newExam._id = mongoose.Types.ObjectId()
+        newExam.isNew = true
+        newExam.title = req.body.title
+        newExam.start_time = req.body.start_time
+        newExam.end_time = req.body.end_time
+        newExam.save(function (err) {
+            if (err)
+                res.json(err);
+            res.json({
+                message: 'Exam Info duplicated',
+                data: newExam
+            });
         });
     });
 };
@@ -57,6 +81,8 @@ exports.update = function (req, res) {
         if (err)
             res.send(err);
         exam.title = req.body.title
+        exam.start_time = req.body.start_time;
+        exam.end_time = req.body.end_time;
         exam.save(function (err) {
             if (err)
                 res.json(err);

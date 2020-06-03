@@ -76,6 +76,7 @@ router.route('/posts/:post_id')
 router.route('/exams')
     .get(examController.index)
     .post(examController.new);
+router.post('/exams/:exam_id/duplicate',examController.duplicate)
 router.post('/exams/:exam_id/add-sequence',examController.addSequence)
 router.post('/exams/:sequence_id/update-order',examController.updateOrder)
 router.post('/exams/:sequence_id/update-countdown',examController.updateCountdown)

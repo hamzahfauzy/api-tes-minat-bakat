@@ -305,7 +305,7 @@ exports.startExam = async (req, res) => {
     })
     
     // var exam = await Exam.findById(req.body.exam_id).populate('participants')
-    var _sequences = await Sequence.find()
+    var _sequences = await Sequence.find({})
     var sequences = []
     for(var i=0;i<_sequences.length;i++)
     {

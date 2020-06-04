@@ -96,16 +96,16 @@ exports.importPosts = async function (req, res) {
             for(i=1;i<rows.length;i++)
             {
                 var val = rows[i]
-                var category = await Category.findOneAndUpdate({name:val[1]},{
-                    name:val[1],
-                    category:val[1],
-                },{new:true,upsert:true})
+                // var category = await Category.findOneAndUpdate({name:val[1]},{
+                //     name:val[1],
+                //     category:val[1],
+                // },{new:true,upsert:true})
                 // console.log('category')
 
                 var subcategory = await Category.findOneAndUpdate({name:val[2]},{
                     name:val[2],
                     category:val[2],
-                    parent:category
+                    // parent:category
                 },{new:true,upsert:true})
                 // console.log('subcategory')
 

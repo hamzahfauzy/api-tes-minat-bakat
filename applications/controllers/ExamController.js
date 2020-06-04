@@ -165,13 +165,13 @@ exports.importParticipants = function (req, res) {
                         }
                     },{new:true,upsert:true})
                     participants.push({
-                        user:{
+                        
                             _id:user._id,
                             nis:val[1],
                             name:val[2],
                             birthdate:val[3],
                             gender:val[4]
-                        },
+                        
                     })
                 }
                 Exam.findById(fields.exam_id, function (err, exam) {

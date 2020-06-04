@@ -1,6 +1,7 @@
 // Import contact model
 User = require('./../models/User');
 Exam = require('./../models/Exam');
+Sequence = require('./../models/Sequence');
 const jwt = require("jsonwebtoken");
 const config = require("config");
 // Handle index actions
@@ -131,11 +132,16 @@ exports.detail = async function (req, res) {
         const decoded = jwt.verify(token, config.get("myprivatekey"));
         var user = await User.findById(decoded._id)
         var otherData = user.isAdmin ? {} : await Exam.findById(user.metas.exam_id).populate('participants')
-        res.json({
-            message: 'User details loading..',
-            data: user,
-            otherData:otherData
-        });
+
+        Sequence.get(function(err,sequences){
+            res.json({
+                message: 'User details loading..',
+                data: user,
+                otherData:otherData,
+                sequences: sequences
+            });
+        })
+        
     } catch (ex) {
         //if invalid token
         res.status(400).send("Invalid token.");

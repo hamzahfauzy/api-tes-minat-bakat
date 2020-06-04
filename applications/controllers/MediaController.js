@@ -43,6 +43,9 @@ exports.new = async function (req, res) {
             
             await media.save();
             res.json({
+                uploaded:1,
+                filename:media.name,
+                url:media.url,
                 status: "success",
                 message: "success",
             });

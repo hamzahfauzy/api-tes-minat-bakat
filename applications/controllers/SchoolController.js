@@ -129,9 +129,14 @@ exports.update = function (req, res) {
 
 // Handle delete contact
 exports.delete = function (req, res) {
+    User.deleteMany({
+        'metas.school._id' : new mongoose.Types.ObjectId(req.params.school_id)
+    }, (err, user) => {
+
+    })
     School.remove({
         _id: req.params.school_id
-    }, function (err, contact) {
+    }, function (err, school) {
         if (err)
             res.send(err);
         res.json({

@@ -40,24 +40,19 @@ exports.new = async function (req, res) {
     var examSave = await exam.save()
 
     var participants = []
-    for(var i=1;i<school.students.length;i++)
+    for(var i=0;i<school.students.length;i++)
     {
         var val = school.students[i]
+        var metas = {
+            gender:val.gender,
+            school:school,
+            exam_id:examSave._id
+        }
         var user = await User.findOneAndUpdate({
-            name:val.name,
-            username:val.nis,
-            password:val.birthdate,
+            _id:val._id,
         },{
-            name: val.name,
-            username: val.nis,
-            password: val.birthdate,
-            isAdmin: false,
-            status: true,
-            metas: {
-                exam_id:examSave._id,
-                gender:val.gender
-            }
-        },{new:true,upsert:true})
+            metas: metas,
+        })
         participants.push({
             _id:user._id,
             nis:val.nis,
@@ -77,7 +72,7 @@ exports.new = async function (req, res) {
                 });
             res.json({
                 message: 'New exam created!',
-                data: examSave
+                data: exam
             });
         })
     })

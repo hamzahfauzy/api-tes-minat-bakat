@@ -2,6 +2,7 @@
 Exam = require('./../models/Exam')
 User = require('./../models/User')
 Post = require('./../models/Post')
+School = require('./../models/School')
 var mongoose = require('mongoose');
 var mv = require('mv');
 var path = require('path');
@@ -27,19 +28,59 @@ exports.index = function (req, res) {
 };
 
 // Handle create user actions
-exports.new = function (req, res) {
+exports.new = async function (req, res) {
     var exam = new Exam();
+    var school = await School.findById(req.body.school_id)
+    exam.school_id = req.body.school_id
+    // exam.participants = school.students
     exam.title = req.body.title;
     exam.start_time = req.body.start_time;
     exam.end_time = req.body.end_time;
-    exam.save(function (err) {
-        // if (err)
-        //     res.json(err);
-        res.json({
-            message: 'New exam created!',
-            data: exam
-        });
-    });
+    var examSave = await exam.save()
+
+    var participants = []
+    for(var i=1;i<school.students.length;i++)
+    {
+        var val = school.students[i]
+        var user = await User.findOneAndUpdate({
+            name:val.name,
+            username:val.nis,
+            password:val.birthdate,
+        },{
+            name: val.name,
+            username: val.nis,
+            password: val.birthdate,
+            isAdmin: false,
+            status: true,
+            metas: {
+                exam_id:examSave._id,
+                gender:val.gender
+            }
+        },{new:true,upsert:true})
+        participants.push({
+            _id:user._id,
+            nis:val.nis,
+            name:val.name,
+            birthdate:val.birthdate,
+            gender:val.gender
+        })
+    }
+
+    Exam.findById(examSave._id, function (err, exam) {
+        exam.participants = participants
+        exam.save(err => {
+            if(err)
+                res.json({
+                    message: 'New exam created error!',
+                    data: err
+                });
+            res.json({
+                message: 'New exam created!',
+                data: examSave
+            });
+        })
+    })
+
 };
 
 // Handle create user actions

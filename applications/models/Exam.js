@@ -1,28 +1,13 @@
 var mongoose = require('mongoose');
 // Setup schema
 var examSchema = mongoose.Schema({
+    school_id:String,
     title: {
         type: String,
         required: true
     },
-    participants:[{
-        user:{},
-        answered:[{
-            question:{},
-            answer:{},
-            status:Boolean
-        }],
-        answer_random:[{
-            question:{},
-            answers:[]
-        }]
-    }],
-    sequences:[{
-        title:String,
-        contents:[],
-        order:Number,
-        countdown:Number,
-    }],
+    participants:[],
+    sequences:[],
     start_time:String,
     end_time:String,
     create_date: {

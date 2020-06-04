@@ -14,9 +14,11 @@ router.get('/', function (req, res) {
 
 var userController = require('./../applications/controllers/UserController');
 var categoryController = require('./../applications/controllers/CategoryController');
+var schoolController = require('./../applications/controllers/SchoolController');
 var mediaController = require('./../applications/controllers/MediaController');
 var postController = require('./../applications/controllers/PostController');
 var examController = require('./../applications/controllers/ExamController');
+var sequenceController = require('./../applications/controllers/SequenceController');
 
 router.get('/uploads/:img', (req, res) => {
     res.sendFile(path.join(__dirname, "../uploads/"+req.params.img));
@@ -86,6 +88,27 @@ router.route('/exams/:exam_id')
     // .patch(examController.update)
     .put(examController.update)
     .delete(examController.delete);
+
+router.route('/schools')
+    .get(schoolController.index)
+    .post(schoolController.new);
+
+router.route('/schools/:school_id')
+    .get(schoolController.view)
+    .put(schoolController.update)
+    .post(schoolController.importStudents)
+    .delete(schoolController.delete);
+
+router.route('/sequences')
+    .get(sequenceController.index)
+    .post(sequenceController.new);
+
+router.route('/sequences/:sequence_id')
+    .get(sequenceController.view)
+    .put(sequenceController.update)
+    .delete(sequenceController.delete);
+
+
 
 // Export API routes
 module.exports = router;

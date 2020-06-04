@@ -68,21 +68,21 @@ exports.importStudents = function (req, res) {
                         for(var i=1;i<rows.length;i++)
                         {
                             var val = rows[i]
-                            // var user = await User.findOneAndUpdate({
-                            //     name: val[2],
-                            //     username:val[1],
-                            //     password: val[3],
-                            // },{
-                            //     name: val[2],
-                            //     username: val[1],
-                            //     password: val[3],
-                            //     isAdmin: false,
-                            //     status: true,
-                            //     metas: {
-                            //         school:school,
-                            //         gender:val[4]
-                            //     }
-                            // },{new:true,upsert:true})
+                            var user = await User.findOneAndUpdate({
+                                name: val[2],
+                                username:val[1],
+                                password: val[3],
+                            },{
+                                name: val[2],
+                                username: val[1],
+                                password: val[3],
+                                isAdmin: false,
+                                status: true,
+                                metas: {
+                                    school:school,
+                                    gender:val[4]
+                                }
+                            },{new:true,upsert:true})
                             students.push({
                                 _id:user._id,
                                 nis:val[1],

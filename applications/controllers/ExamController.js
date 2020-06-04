@@ -92,6 +92,7 @@ exports.duplicate = function (req, res) {
         newExam._id = mongoose.Types.ObjectId()
         newExam.isNew = true
         newExam.title = req.body.title
+        newExam.participants = []
         newExam.start_time = req.body.start_time
         newExam.end_time = req.body.end_time
         newExam.save(function (err) {

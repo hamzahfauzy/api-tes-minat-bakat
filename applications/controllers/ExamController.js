@@ -3,6 +3,7 @@ Exam = require('./../models/Exam')
 User = require('./../models/User')
 Post = require('./../models/Post')
 School = require('./../models/School')
+Sequence = require('./../models/Sequence')
 var mongoose = require('mongoose');
 var mv = require('mv');
 var path = require('path');
@@ -303,11 +304,12 @@ exports.startExam = async (req, res) => {
         metas: metas
     })
     
-    var exam = await Exam.findById(req.body.exam_id).populate('participants')
+    // var exam = await Exam.findById(req.body.exam_id).populate('participants')
+    var _sequences = await Sequence.find()
     var sequences = []
-    for(var i=0;i<exam.sequences.length;i++)
+    for(var i=0;i<_sequences.length;i++)
     {
-        var sequence = exam.sequences[i]
+        var sequence = _sequences[i]
         sequence = JSON.stringify(sequence)
         sequence = JSON.parse(sequence)
         var contents = []
@@ -324,7 +326,7 @@ exports.startExam = async (req, res) => {
         sequence.contents = contents
         sequences.push(sequence)
     }
-    seqeunces = sequences.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+    sequences = sequences.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
     res.json({
         status: "success",
         message: 'Exam start',

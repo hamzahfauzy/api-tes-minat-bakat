@@ -133,14 +133,11 @@ exports.detail = async function (req, res) {
         var user = await User.findById(decoded._id)
         var otherData = user.isAdmin ? {} : await Exam.findById(user.metas.exam_id).populate('participants')
 
-        Sequence.get(function(err,sequences){
-            res.json({
-                message: 'User details loading..',
-                data: user,
-                otherData:otherData,
-                sequences: sequences
-            });
-        })
+        res.json({
+            message: 'User details loading..',
+            data: user,
+            otherData:otherData,
+        });
         
     } catch (ex) {
         //if invalid token

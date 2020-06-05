@@ -30,9 +30,10 @@ exports.new = async function (req, res) {
     var newpath = ""
     var hostname = req.headers.host; // hostname = 'localhost:8080'
     var pathname = url.parse(req.url).pathname; // pathname = '/MyApp'
-    var base_url = 'http://' + hostname;
+    var base_url = 'http://' + hostname
+    
     form.parse(req, async function (err, fields, files) {
-        var _file = files.filetoupload
+        var _file = req.query.upload ? files.upload : files.filetoupload
         oldpath = _file.path;
         newpath = appDir + "/uploads/" + _file.name
         mv(oldpath, newpath, async function (err) {

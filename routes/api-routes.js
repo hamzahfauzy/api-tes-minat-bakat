@@ -26,6 +26,10 @@ router.get('/uploads/:img', (req, res) => {
 router.post('/login', userController.login)
 router.post('/register-admin', userController.register)
 
+router.route('/media')
+    .get(mediaController.index)
+    .post(mediaController.new);
+
 // router.use(auth)
 router.get('/auth-detail', auth, userController.detail)
 
@@ -55,10 +59,6 @@ router.route('/categories/:category_id')
     // .patch(categoryController.update)
     .put(categoryController.update)
     .delete(categoryController.delete);
-
-router.route('/media')
-    .get(mediaController.index)
-    .post(mediaController.new);
 
 router.route('/media/:media_id').delete(mediaController.delete)
 

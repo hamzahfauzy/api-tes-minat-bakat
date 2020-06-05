@@ -73,7 +73,10 @@ exports.new = async function (req, res) {
     post.type_as = req.body.type_as;
     post.save(function (err) {
         if (err)
+        {
             res.json(err);
+            return
+        }
         res.json({
             message: 'New post created!',
             data: post
@@ -140,7 +143,10 @@ exports.importPosts = async function (req, res) {
 exports.view = function (req, res) {
     Post.findById(req.params.post_id, function (err, post) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             message: 'Post details loading..',
             data: post
@@ -162,7 +168,10 @@ exports.viewParent = function (req, res) {
 exports.viewByType = function (req, res) {
     Post.find({type_as:req.params.type_as}, async function (err, posts) {
         if (err)
+        {
             res.send(err);
+            return
+        }
 
         var _posts = []
         // _post.question = post
@@ -195,7 +204,10 @@ exports.update = async function (req, res) {
     post.type_as = req.body.type_as;
     post.save(function (err) {
         if (err)
+        {
             res.json(err);
+            return
+        }
         res.json({
             message: 'Post Info updated',
             data: post
@@ -209,7 +221,10 @@ exports.delete = function (req, res) {
         _id: req.params.post_id
     }, function (err, contact) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             status: "success",
             message: 'Pot deleted'

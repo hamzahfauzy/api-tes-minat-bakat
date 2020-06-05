@@ -10,6 +10,7 @@ exports.index = function (req, res) {
                 status: "error",
                 message: err,
             });
+            return
         }
         res.json({
             status: "success",
@@ -41,7 +42,10 @@ exports.new = async function (req, res) {
 exports.view = function (req, res) {
     Category.findById(req.params.category_id, function (err, category) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             message: 'Category details loading..',
             data: category
@@ -52,7 +56,10 @@ exports.view = function (req, res) {
 exports.viewParent = function (req, res) {
     Category.find({'parent._id':new mongoose.Types.ObjectId(req.params.category_id)}, function (err, categories) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             message: 'Category details loading..',
             data: categories
@@ -64,7 +71,10 @@ exports.viewParent = function (req, res) {
 exports.update = function (req, res) {
     Category.findById(req.params.category_id, function (err, category) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         category.name = req.body.name ? req.body.name : category.name;
         category.description = req.body.description;
         category.parent = req.body.parent ? req.body.parent : '';
@@ -72,7 +82,10 @@ exports.update = function (req, res) {
         // save the user and check for errors
         category.save(function (err) {
             if (err)
+            {
                 res.json(err);
+                return
+            }
             res.json({
                 message: 'Category Info updated',
                 data: category
@@ -87,7 +100,10 @@ exports.delete = function (req, res) {
         _id: req.params.category_id
     }, function (err, contact) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             status: "success",
             message: 'Category deleted'

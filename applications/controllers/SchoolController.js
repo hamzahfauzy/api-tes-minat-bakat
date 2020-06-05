@@ -16,6 +16,7 @@ exports.index = function (req, res) {
                 status: "error",
                 message: err,
             });
+            return
         }
         res.json({
             status: "success",
@@ -31,8 +32,11 @@ exports.new = async function (req, res) {
     school.name = req.body.name ? req.body.name : school.name;
     school.students = req.body.students;
     school.save(function (err) {
-        // if (err)
-        //     res.json(err);
+        if (err)
+        {
+            res.json(err);
+            return
+        }
         res.json({
             message: 'New school created!',
             data: school
@@ -44,7 +48,10 @@ exports.new = async function (req, res) {
 exports.view = function (req, res) {
     School.findById(req.params.school_id, function (err, school) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             message: 'school details loading..',
             data: school
@@ -63,7 +70,10 @@ exports.importStudents = function (req, res) {
                 // rows.shift();
                 School.findById(fields.school_id, async function (err, school) {
                     if (err)
+                    {
                         res.send(err);
+                        return
+                    }
                         var students = []
                         for(var i=1;i<rows.length;i++)
                         {
@@ -94,7 +104,10 @@ exports.importStudents = function (req, res) {
                     school.students = students
                     school.save(function (err) {
                         if (err)
+                        {
                             res.json(err);
+                            return
+                        }
                         res.json({
                             message: 'School Info updated',
                             data: school
@@ -111,7 +124,10 @@ exports.importStudents = function (req, res) {
 exports.update = function (req, res) {
     School.findById(req.params.school_id, function (err, school) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         school.name = req.body.name ? req.body.name : school.name;
         school.students = req.body.students;
         
@@ -138,7 +154,10 @@ exports.delete = function (req, res) {
         _id: req.params.school_id
     }, function (err, school) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             status: "success",
             message: 'School deleted'

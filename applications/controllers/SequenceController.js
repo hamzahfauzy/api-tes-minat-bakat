@@ -11,6 +11,7 @@ exports.index = function (req, res) {
                 status: "error",
                 message: err,
             });
+            return
         }
         res.json({
             status: "success",
@@ -36,8 +37,11 @@ exports.new = async function (req, res) {
     sequence.contents = posts;
 
     sequence.save(function (err) {
-        // if (err)
-        //     res.json(err);
+        if (err)
+        {
+            res.json(err);
+            return
+        }
         res.json({
             message: 'New school created!',
             data: sequence
@@ -49,7 +53,10 @@ exports.new = async function (req, res) {
 exports.view = function (req, res) {
     Sequence.findById(req.params.sequence_id, function (err, sequence) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             message: 'sequence details loading..',
             data: sequence
@@ -61,7 +68,10 @@ exports.view = function (req, res) {
 exports.update = function (req, res) {
     Sequence.findById(req.params.sequence_id,  async function (err, sequence) {
         if (err)
+        {
             res.send(err);
+            return
+        }
 
         sequence.title = req.body.title ? req.body.title : sequence.title;
         sequence.order = req.body.order ? req.body.order : sequence.order;
@@ -70,7 +80,10 @@ exports.update = function (req, res) {
         // save the user and check for errors
         sequence.save(function (err) {
             if (err)
+            {
                 res.json(err);
+                return
+            }
             res.json({
                 message: 'sequence Info updated',
                 data: sequence
@@ -85,7 +98,10 @@ exports.delete = function (req, res) {
         _id: req.params.sequence_id
     }, function (err, contact) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             status: "success",
             message: 'sequence deleted'

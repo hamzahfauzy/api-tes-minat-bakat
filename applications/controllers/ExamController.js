@@ -19,6 +19,7 @@ exports.index = function (req, res) {
                 status: "error",
                 message: err,
             });
+            return
         }
         res.json({
             status: "success",
@@ -66,10 +67,13 @@ exports.new = async function (req, res) {
         exam.participants = participants
         exam.save(err => {
             if(err)
+            {
                 res.json({
                     message: 'New exam created error!',
                     data: err
                 });
+                return
+            }
             res.json({
                 message: 'New exam created!',
                 data: exam
@@ -83,7 +87,10 @@ exports.new = async function (req, res) {
 exports.duplicate = function (req, res) {
     Exam.findById(req.params.exam_id, function (err, exam) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         var newExam = new Exam(exam)
         newExam._id = mongoose.Types.ObjectId()
         newExam.isNew = true
@@ -93,7 +100,10 @@ exports.duplicate = function (req, res) {
         newExam.end_time = req.body.end_time
         newExam.save(function (err) {
             if (err)
+            {
                 res.json(err);
+                return
+            }
             res.json({
                 message: 'Exam Info duplicated',
                 data: newExam
@@ -117,13 +127,19 @@ exports.view = function (req, res) {
 exports.update = function (req, res) {
     Exam.findById(req.params.exam_id, function (err, exam) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         exam.title = req.body.title
         exam.start_time = req.body.start_time;
         exam.end_time = req.body.end_time;
         exam.save(function (err) {
             if (err)
+            {
                 res.json(err);
+                return
+            }
             res.json({
                 message: 'Exam Info updated',
                 data: exam
@@ -173,11 +189,17 @@ exports.importParticipants = function (req, res) {
                 }
                 Exam.findById(fields.exam_id, function (err, exam) {
                     if (err)
+                    {
                         res.send(err);
+                        return
+                    }
                     exam.participants = participants
                     exam.save(function (err) {
                         if (err)
+                        {
                             res.json(err);
+                            return
+                        }
                         res.json({
                             message: 'Exam Info updated',
                             data: exam
@@ -201,7 +223,10 @@ exports.updateOrder = (req,res) => {
         exam.sequences = sequences
         exam.save(function (err) {
             if (err)
+            {
                 res.json(err);
+                return
+            }
             res.json({
                 message: 'Exam Info updated',
                 data: exam
@@ -233,7 +258,10 @@ exports.updateCountdown = (req,res) => {
         exam.sequences = sequences
         exam.save(function (err) {
             if (err)
+            {
                 res.json(err);
+                return
+            }
             res.json({
                 message: 'Exam Info updated',
                 data: exam
@@ -245,7 +273,10 @@ exports.updateCountdown = (req,res) => {
 exports.addSequence = async (req,res) => { 
     Exam.findById(req.params.exam_id, async function (err, exam) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         var sequences = req.body
         var posts = []
         if(sequences.content_type == 'category')
@@ -261,7 +292,10 @@ exports.addSequence = async (req,res) => {
         exam.sequences.push(sequence)
         exam.save(function (err) {
             if (err)
+            {
                 res.json(err);
+                return
+            }
             res.json({
                 message: 'Exam Info updated',
                 data: exam
@@ -275,7 +309,10 @@ exports.delete = function (req, res) {
         _id: req.params.exam_id
     }, function (err, contact) {
         if (err)
+        {
             res.send(err);
+            return
+        }
         res.json({
             status: "success",
             message: 'Exam deleted'

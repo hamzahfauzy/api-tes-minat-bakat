@@ -2,6 +2,7 @@
 User = require('./../models/User');
 Exam = require('./../models/Exam');
 Sequence = require('./../models/Sequence');
+School = require('./../models/School');
 const jwt = require("jsonwebtoken");
 const config = require("config");
 // Handle index actions
@@ -132,7 +133,10 @@ exports.detail = async function (req, res) {
         const decoded = jwt.verify(token, config.get("myprivatekey"));
         var user = await User.findById(decoded._id)
         var otherData = user.isAdmin ? {} : await Exam.findById(user.metas.exam_id).populate('participants')
-
+        otherData = JSON.stringify(otherData)
+        otherData = JSON.parse(otherData)
+        var school = await School.findById(otherData.school_id)    
+        otherData.school = await school
         res.json({
             message: 'User details loading..',
             data: user,

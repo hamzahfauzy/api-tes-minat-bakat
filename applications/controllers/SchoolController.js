@@ -78,6 +78,19 @@ exports.importStudents = function (req, res) {
                         for(var i=1;i<rows.length;i++)
                         {
                             var val = rows[i]
+                            var user_exists = await User.findOne({
+                                name: val[2],
+                                username:val[1],
+                                password: val[3],
+                            })
+                            var metas = {}
+                            if(user_exists)
+                            {
+                                metas = JSON.stringify(user_exists.metas)
+                                metas = JSON.parse(metas)
+                            }
+                            metas.school = school
+                            metas.gender = val[4]
                             var user = await User.findOneAndUpdate({
                                 name: val[2],
                                 username:val[1],
@@ -88,10 +101,7 @@ exports.importStudents = function (req, res) {
                                 password: val[3],
                                 isAdmin: false,
                                 status: true,
-                                metas: {
-                                    school:school,
-                                    gender:val[4]
-                                }
+                                metas: metas,
                             },{new:true,upsert:true})
                             students.push({
                                 _id:user._id,

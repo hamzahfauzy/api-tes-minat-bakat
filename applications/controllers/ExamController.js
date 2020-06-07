@@ -371,7 +371,7 @@ exports.sendUserSequence = async (req, res) => {
     var user = await User.findById(req.user._id)
     var metas = JSON.stringify(user.metas)
     metas = JSON.parse(metas)
-    metas.sequences = req.body
+    metas.sequences = req.body.sequences
     var userUpdate = await User.findOneAndUpdate({
         _id: req.user._id,
     },{

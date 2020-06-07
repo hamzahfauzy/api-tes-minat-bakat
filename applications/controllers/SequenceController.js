@@ -66,6 +66,10 @@ exports.view = function (req, res) {
 
 // Handle update user info
 exports.update = function (req, res) {
+    res.json({
+        oke:'oke'
+    })
+    return
     Sequence.findById(req.params.sequence_id,  async function (err, sequence) {
         if (err)
         {

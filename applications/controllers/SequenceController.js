@@ -43,7 +43,7 @@ exports.new = async function (req, res) {
             return
         }
         res.json({
-            message: 'New school created!',
+            message: 'New sequence created!',
             data: sequence
         });
     });
@@ -82,6 +82,8 @@ exports.update = function (req, res) {
             posts = await Post.find({'category._id':new mongoose.Types.ObjectId(req.body.contents)})
         else
             posts = await Post.findById(new mongoose.Types.ObjectId(req.body.contents))
+
+        sequence.contents = posts;
         
         // save the user and check for errors
         sequence.save(function (err) {

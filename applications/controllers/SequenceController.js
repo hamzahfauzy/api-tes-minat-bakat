@@ -94,7 +94,8 @@ exports.update = function (req, res) {
             }
             res.json({
                 message: 'sequence Info updated',
-                data: sequence
+                data: sequence,
+                posts:posts
             });
         });
     });

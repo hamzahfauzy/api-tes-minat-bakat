@@ -347,8 +347,10 @@ exports.startExam = async (req, res) => {
         var contents = []
         for(var j=0;j<sequence.contents.length;j++)
         {
-            var content = sequence.contents[j]
-            var sub_contents = content.type_as == "question" ? await Post.find({'parent._id':new mongoose.Types.ObjectId(content._id)}).select('-type_as') : {}
+            var content = JSON.stringify(sequence.contents[j])
+            content = JSON.parse(content)
+            delete content.category
+            var sub_contents = content.type_as == "question" ? await Post.find({'parent._id':new mongoose.Types.ObjectId(content._id)}).select('-type_as -parent') : {}
             sub_contents = sub_contents.length ? sub_contents.sort(() => Math.random() - 0.5) : {};
             contents.push({
                 parent:content,

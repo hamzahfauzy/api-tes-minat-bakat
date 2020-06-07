@@ -21,10 +21,13 @@ let apiRoutes = require("./routes/api-routes")
 let bodyParser = require('body-parser');
 
 // Configure bodyparser to handle post requests
-app.use(bodyParser.urlencoded({
-   extended: true
-}));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({
+//    extended: true
+// }));
+// app.use(bodyParser.json());
+
+app.use(bodyParser.json({limit: "50mb"}));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 
 // Use Api routes in the App
 app.use('/api', apiRoutes)

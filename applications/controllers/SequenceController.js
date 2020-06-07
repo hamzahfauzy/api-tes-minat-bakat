@@ -76,6 +76,12 @@ exports.update = function (req, res) {
         sequence.title = req.body.title ? req.body.title : sequence.title;
         sequence.order = req.body.order ? req.body.order : sequence.order;
         sequence.countdown = req.body.countdown ? req.body.countdown : sequence.countdown;
+
+        var posts = []
+        if(req.body.content_type == 'category')
+            posts = await Post.find({'category._id':new mongoose.Types.ObjectId(req.body.contents)})
+        else
+            posts = await Post.findById(new mongoose.Types.ObjectId(req.body.contents))
         
         // save the user and check for errors
         sequence.save(function (err) {

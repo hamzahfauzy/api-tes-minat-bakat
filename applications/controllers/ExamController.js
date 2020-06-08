@@ -330,11 +330,7 @@ exports.startExam = async (req, res) => {
         metas[""+val] = req.body[val]
     })
 
-    var userUpdate = await User.findOneAndUpdate({
-        _id: req.user._id,
-    },{
-        metas: metas
-    })
+    
     
     // var exam = await Exam.findById(req.body.exam_id).populate('participants')
     var _sequences = await Sequence.find({})
@@ -361,6 +357,13 @@ exports.startExam = async (req, res) => {
         sequences.push(sequence)
     }
     sequences = sequences.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+    metas.sequences = sequences
+    metas.seqActive = 0
+    var userUpdate = await User.findOneAndUpdate({
+        _id: req.user._id,
+    },{
+        metas: metas
+    })
     res.json({
         status: "success",
         message: 'Exam start',

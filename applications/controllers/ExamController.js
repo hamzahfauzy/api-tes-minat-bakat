@@ -38,6 +38,7 @@ exports.new = async function (req, res) {
     exam.title = req.body.title;
     exam.start_time = req.body.start_time;
     exam.end_time = req.body.end_time;
+    exam.school_id = req.body.school_id;
     var examSave = await exam.save()
 
     var participants = []
@@ -125,15 +126,40 @@ exports.view = function (req, res) {
 };
 
 exports.update = function (req, res) {
-    Exam.findById(req.params.exam_id, function (err, exam) {
+    Exam.findById(req.params.exam_id, async function (err, exam) {
         if (err)
         {
             res.send(err);
             return
         }
+        var school = await School.findById(req.body.school_id)
+        var participants = []
+        for(var i=0;i<school.students.length;i++)
+        {
+            var val = school.students[i]
+            var metas = {
+                gender:val.gender,
+                school:school,
+                exam_id:examSave._id
+            }
+            var user = await User.findOneAndUpdate({
+                _id:val._id,
+            },{
+                metas: metas,
+            })
+            participants.push({
+                _id:user._id,
+                nis:val.nis,
+                name:val.name,
+                birthdate:val.birthdate,
+                gender:val.gender
+            })
+        }
         exam.title = req.body.title
         exam.start_time = req.body.start_time;
         exam.end_time = req.body.end_time;
+        exam.school_id = req.body.school_id;
+        exam.participants = participants;
         exam.save(function (err) {
             if (err)
             {

@@ -75,9 +75,13 @@ router.route('/posts/:post_id')
     .put(postController.update)
     .delete(postController.delete);
 
+
 router.route('/exams')
     .get(examController.index)
     .post(examController.new);
+
+router.get('/exams/getParticipantsActive/:school_id',examController.getParticipantsActive)
+
 router.post('/exams/:exam_id/duplicate',examController.duplicate)
 router.post('/exams/:exam_id/add-sequence',examController.addSequence)
 router.post('/exams/:sequence_id/update-order',examController.updateOrder)

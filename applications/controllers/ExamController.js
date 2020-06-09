@@ -140,7 +140,7 @@ exports.update = function (req, res) {
             var metas = {
                 gender:val.gender,
                 school:school,
-                exam_id:examSave._id
+                exam_id:exam._id
             }
             var user = await User.findOneAndUpdate({
                 _id:val._id,
@@ -328,6 +328,11 @@ exports.addSequence = async (req,res) => {
             });
         });
     });
+}
+
+exports.getParticipantsActive = async (req,res) => {
+    var users = await User.find({'metas.school._id':req.params.school_id})
+    res.json(users)
 }
 
 exports.delete = function (req, res) {

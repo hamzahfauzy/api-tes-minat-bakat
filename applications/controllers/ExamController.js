@@ -25,7 +25,7 @@ exports.index = function (req, res) {
         var _exams = JSON.stringify(exams)
         _exams = JSON.parse(_exams)
 
-        for(var h=0;h<_exams.participants.length;h++){
+        for(var h=0;h<_exams.length;h++){
             var users = _exams[h].participants
             var reports = []
             for(var i=0;i<users.length;i++)

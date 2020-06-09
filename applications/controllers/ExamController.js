@@ -30,6 +30,7 @@ exports.index = function (req, res) {
             var reports = []
             for(var i=0;i<users.length;i++)
             {
+                var participant = users[i]
                 var user = await User.findById(users[i]._id)
                 user = JSON.stringify(user)
                 user = JSON.parse(user)
@@ -38,6 +39,9 @@ exports.index = function (req, res) {
                 // delete user.sequences
                 var sequences = user.metas.sequences
                 if(typeof sequences === 'undefined'){
+                    user.metas.NISN = participant.nis
+                    user.metas.tempat_tanggal_lahir = participant.birthdate
+                    user.metas.jenis_kelamin = participant.gender
                     reports.push(user)
                     continue
                 } 

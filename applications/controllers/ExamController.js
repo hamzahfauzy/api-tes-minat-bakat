@@ -330,42 +330,49 @@ exports.addSequence = async (req,res) => {
     });
 }
 
-exports.getParticipantsActive = async (req,res) => {
+exports.report = async (req,res) => {
     var users = await User.find({'metas.school._id':req.params.school_id})
     res.json(users)
 }
 
-exports.report = async (req, res) => {
+exports.getParticipantsActive = async (req, res) => {
     var users = await User.find({'metas.school._id':req.params.school_id})
     users = JSON.stringify(users)
     users = JSON.parse(users)
     var reports = []
     for(var i=0;i<users.length;i++)
     {
-        var user = users[i].metas
-        delete user.sequences
+        var user = users[i]
+        // delete user.metas.sequences
+        delete user.metas.school
+        // delete user.sequences
         user.nilai = []
-        var sequences = users[i].metas.sequences
+        var sequences = user.metas.sequences
+        if(typeof sequences === 'undefined') continue
         for (var j = 0; j < sequences.length; j++) 
         {
             var quis = j+1
-            if(j%2 != 0) continue;
+            if(quis%2 != 0) continue;
             var sequence = sequences[j].contents
             var nilai = 0
             for(var k = 0; k < sequence.length; k++)
             {
                 var content = sequence[k]
                 // if(content.childs.length == 0) continue;
-
+                if(typeof content.selected === 'undefined') continue
                 var selected = content.selected
                 var post = await Post.findById(selected)
-                if(post.type_as == "correct answer") nilai++
+                if(post && post.type_as == "correct answer") nilai++
             }
-            user.nilai.push(nilai)
+            user.nilai.push({
+                title:sequences[j].title,
+                nilai:nilai
+            })
         }
+        delete user.metas.sequences
         reports.push(user)
     }
-    res.json(user)
+    res.json(reports)
 }
 
 exports.delete = function (req, res) {

@@ -346,7 +346,6 @@ exports.getParticipantsActive = async (req, res) => {
         // delete user.metas.sequences
         delete user.metas.school
         // delete user.sequences
-        user.nilai = []
         var sequences = user.metas.sequences
         if(typeof sequences === 'undefined') continue
         for (var j = 0; j < sequences.length; j++) 
@@ -364,10 +363,11 @@ exports.getParticipantsActive = async (req, res) => {
                 var post = await Post.findById(selected)
                 if(post && post.type_as == "correct answer") nilai++
             }
-            user.nilai.push({
-                title:sequences[j].title,
-                nilai:nilai
-            })
+            // user.nilai.push({
+            //     title:sequences[j].title,
+            //     nilai:nilai
+            // })
+            user[""+sequences[j].title] = nilai
         }
         delete user.metas.sequences
         reports.push(user)

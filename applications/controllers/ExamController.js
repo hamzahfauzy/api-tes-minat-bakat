@@ -31,6 +31,8 @@ exports.index = function (req, res) {
             for(var i=0;i<users.length;i++)
             {
                 var user = await User.findById(users[i]._id)
+                user = JSON.stringify(user)
+                user = JSON.parse(user)
                 // delete user.metas.sequences
                 delete user.metas.school
                 // delete user.sequences

@@ -81,6 +81,7 @@ router.route('/exams')
     .post(examController.new);
 
 router.get('/exams/getParticipantsActive/:school_id',examController.getParticipantsActive)
+router.get('/exams/report/:school_id',examController.report)
 
 router.post('/exams/:exam_id/duplicate',examController.duplicate)
 router.post('/exams/:exam_id/add-sequence',examController.addSequence)

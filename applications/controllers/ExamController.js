@@ -335,6 +335,39 @@ exports.getParticipantsActive = async (req,res) => {
     res.json(users)
 }
 
+exports.report = async (req, res) => {
+    var users = await User.find({'metas.school._id':req.params.school_id})
+    users = JSON.stringify(users)
+    users = JSON.parse(users)
+    var reports = []
+    for(var i=0;i<users.length;i++)
+    {
+        var user = users[i].metas
+        delete user.sequences
+        user.nilai = []
+        var sequences = users[i].metas.sequences
+        for (var j = 0; j < sequences.length; j++) 
+        {
+            var quis = j+1
+            if(j%2 != 0) continue;
+            var sequence = sequences[j].contents
+            var nilai = 0
+            for(var k = 0; k < sequence.length; k++)
+            {
+                var content = sequence[k]
+                // if(content.childs.length == 0) continue;
+
+                var selected = content.selected
+                var post = await Post.findById(selected)
+                if(post.type_as == "correct answer") nilai++
+            }
+            user.nilai.push(nilai)
+        }
+        reports.push(user)
+    }
+    res.json(user)
+}
+
 exports.delete = function (req, res) {
     Exam.remove({
         _id: req.params.exam_id

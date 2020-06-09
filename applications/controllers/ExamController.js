@@ -347,7 +347,10 @@ exports.getParticipantsActive = async (req, res) => {
         delete user.metas.school
         // delete user.sequences
         var sequences = user.metas.sequences
-        if(typeof sequences === 'undefined') continue
+        if(typeof sequences === 'undefined'){
+            reports.push(user)
+            continue
+        } 
         for (var j = 0; j < sequences.length; j++) 
         {
             var quis = j+1

@@ -32,6 +32,7 @@ exports.index = function (req, res) {
             {
                 var participant = users[i]
                 var user = await User.findById(users[i]._id)
+                if(!user) continue
                 user = JSON.stringify(user)
                 user = JSON.parse(user)
                 // delete user.metas.sequences

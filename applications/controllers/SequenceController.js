@@ -21,7 +21,7 @@ exports.index = function (req, res) {
     });
 };
 
-exports.generate = (req, res) => {
+exports.generate = async (req, res) => {
     var _sequences = await Sequence.find({})
     var sequences = []
     for(var i=0;i<_sequences.length;i++)

@@ -21,6 +21,34 @@ exports.index = function (req, res) {
     });
 };
 
+exports.generate = (req, res) => {
+    var _sequences = await Sequence.find({})
+    var sequences = []
+    for(var i=0;i<_sequences.length;i++)
+    {
+        var sequence = _sequences[i]
+        sequence = JSON.stringify(sequence)
+        sequence = JSON.parse(sequence)
+        var contents = []
+        for(var j=0;j<sequence.contents.length;j++)
+        {
+            var content = JSON.stringify(sequence.contents[j])
+            content = JSON.parse(content)
+            delete content.category
+            var sub_contents = content.type_as == "question" ? await Post.find({'parent._id':new mongoose.Types.ObjectId(content._id)}).select('-type_as -parent') : {}
+            sub_contents = sub_contents.length ? sub_contents.sort(() => Math.random() - 0.5) : {};
+            contents.push({
+                parent:content,
+                childs:sub_contents
+            })
+        }
+        sequence.contents = contents
+        sequences.push(sequence)
+    }
+    sequences = sequences.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
+    res.json(sequences)
+}
+
 // Handle create user actions
 exports.new = async function (req, res) {
     var sequence = new Sequence();

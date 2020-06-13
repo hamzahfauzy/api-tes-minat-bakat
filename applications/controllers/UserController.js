@@ -57,14 +57,21 @@ exports.login = async function (req, res) {
         return res.status(400).send({
             message:'Username or Password is empty'
         })
-    let user = await User.findOne({ username: req.body.username, password: req.body.password });
+    
+    let user = await User.findOne({ username: req.body.username});
+    
     if (!user) return res.status(400).send({
         message: "User not found."
     });
 
+    
     if (!user.status) return res.status(400).send({
         message: "User not active."
     });
+    
+    if(user.isAdmin && user.password != req.body.password) return res.status(400).send({
+        message: "User not found."
+    })
 
     const token = user.generateAuthToken();
     res.header("x-auth-token", token).send({

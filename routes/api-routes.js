@@ -104,6 +104,7 @@ router.route('/schools/:school_id')
     .post(schoolController.importStudents)
     .delete(schoolController.delete);
 
+router.get('/sequences/generate',sequenceController.generate)
 router.route('/sequences')
     .get(sequenceController.index)
     .post(sequenceController.new);

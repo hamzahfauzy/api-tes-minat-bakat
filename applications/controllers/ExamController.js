@@ -243,25 +243,20 @@ exports.importParticipants = function (req, res) {
                     var user = await User.findOneAndUpdate({
                         name: val[2],
                         username:val[1],
-                        password: val[3],
                     },{
                         name: val[2],
                         username: val[1],
-                        password: val[3],
+                        password: 123,
                         isAdmin: false,
                         status: true,
                         metas: {
                             exam_id:fields.exam_id,
-                            gender:val[4]
                         }
                     },{new:true,upsert:true})
                     participants.push({
-                        
                             _id:user._id,
                             nis:val[1],
-                            name:val[2],
-                            birthdate:val[3],
-                            gender:val[4]
+                            name:val[2]
                         
                     })
                 }

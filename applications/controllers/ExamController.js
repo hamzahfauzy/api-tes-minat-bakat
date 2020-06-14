@@ -41,8 +41,6 @@ exports.index = function (req, res) {
                 var sequences = user.metas.sequences
                 if(typeof sequences === 'undefined'){
                     user.metas.NISN = participant.nis
-                    user.metas.tempat_tanggal_lahir = participant.birthdate
-                    user.metas.jenis_kelamin = participant.gender
                     reports.push(user)
                     continue
                 } 
@@ -98,7 +96,6 @@ exports.new = async function (req, res) {
     {
         var val = school.students[i]
         var metas = {
-            gender:val.gender,
             school:school,
             exam_id:examSave._id
         }
@@ -110,9 +107,7 @@ exports.new = async function (req, res) {
         participants.push({
             _id:user._id,
             nis:val.nis,
-            name:val.name,
-            birthdate:val.birthdate,
-            gender:val.gender
+            name:val.name
         })
     }
 
@@ -190,7 +185,6 @@ exports.update = function (req, res) {
         {
             var val = school.students[i]
             var metas = {
-                gender:val.gender,
                 school:school,
                 exam_id:exam._id
             }
@@ -203,8 +197,6 @@ exports.update = function (req, res) {
                 _id:user._id,
                 nis:val.nis,
                 name:val.name,
-                birthdate:val.birthdate,
-                gender:val.gender
             })
         }
         exam.title = req.body.title

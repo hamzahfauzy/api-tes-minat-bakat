@@ -139,11 +139,15 @@ exports.detail = async function (req, res) {
         //if can verify the token, set req.user and pass to next middleware
         const decoded = jwt.verify(token, config.get("myprivatekey"));
         var user = await User.findById(decoded._id)
-        var otherData = user.isAdmin ? {} : await Exam.findById(user.metas.exam_id).populate('participants')
-        otherData = JSON.stringify(otherData)
-        otherData = JSON.parse(otherData)
-        var school = await School.findById(otherData.school_id)    
-        otherData.school = await school
+        var otherData = {}
+        if(typeof user.metas.exam_id != undefined)
+        {
+            otherData = await Exam.findById(user.metas.exam_id).populate('participants')
+            otherData = JSON.stringify(otherData)
+            otherData = JSON.parse(otherData)
+            var school = await School.findById(otherData.school_id)    
+            otherData.school = await school
+        }
         res.json({
             message: 'User details loading..',
             data: user,

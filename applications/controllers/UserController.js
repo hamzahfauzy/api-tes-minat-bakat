@@ -140,13 +140,18 @@ exports.detail = async function (req, res) {
         const decoded = jwt.verify(token, config.get("myprivatekey"));
         var user = await User.findById(decoded._id)
         var otherData = {}
-        if(typeof user.metas.exam_id != undefined)
+        if('exam_id' in user.metas) //.exam_id != undefined)
         {
             otherData = await Exam.findById(user.metas.exam_id).populate('participants')
-            otherData = JSON.stringify(otherData)
-            otherData = JSON.parse(otherData)
-            var school = await School.findById(otherData.school_id)    
-            otherData.school = await school
+            if(otherData)
+            {
+                otherData = JSON.stringify(otherData)
+                otherData = JSON.parse(otherData)
+                var school = await School.findById(otherData.school_id)    
+                otherData.school = await school
+            }
+            else
+                otherData = {}
         }
         res.json({
             message: 'User details loading..',

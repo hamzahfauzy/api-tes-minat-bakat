@@ -24,7 +24,7 @@ router.get('/uploads/:img', (req, res) => {
     res.sendFile(path.join(__dirname, "../uploads/"+req.params.img));
 });
 
-router.get('/exams/report/:school_id',examController.report)
+router.get('/exams/report/:exam_id',examController.report)
 
 router.post('/login', userController.login)
 router.post('/register-admin', userController.register)

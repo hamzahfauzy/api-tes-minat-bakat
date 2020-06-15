@@ -392,8 +392,9 @@ exports.report = async (req,res) => {
       .string("HASIL 1")
     ws.cell(1, 12)
       .string("HASIL 2")
-    var users = await User.find({'metas.school._id':req.params.school_id})
-    var school = await School.findById(req.params.school_id)
+    var exam = await Exam.findById(req.params.exam_id)
+    var users = exam.participants
+    var school = await School.findById(exam.school_id)
     users = JSON.stringify(users)
     users = JSON.parse(users)
     for(var i=0;i<users.length;i++)

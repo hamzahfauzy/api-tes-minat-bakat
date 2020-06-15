@@ -10,6 +10,7 @@ var path = require('path');
 var appDir = path.dirname(require.main.filename);
 var formidable = require('formidable')
 const readXlsxFile = require('read-excel-file/node')
+var xl = require('excel4node');
 
 // Handle index actions
 exports.index = function (req, res) {
@@ -370,8 +371,127 @@ exports.addSequence = async (req,res) => {
 }
 
 exports.report = async (req,res) => {
+    // Create a new instance of a Workbook class
+    var wb = new xl.Workbook();
+    // Add Worksheets to the workbook
+    var ws = wb.addWorksheet('Sheet 1');
+
+    ws.cell(1, 1)
+      .string("No")
+    ws.cell(1, 2)
+      .string("NAMA")
+    var header_start = 3;
+    var sequences = await Sequence.find({})
+    for(var i=0;i<sequences.length;i++){
+        var quis = i+1
+        if(quis%2 != 0) continue;
+        ws.cell(1, header_start).string(sequences[i].title)
+        header_start++
+    }
+    ws.cell(1, 11)
+      .string("HASIL 1")
+    ws.cell(1, 12)
+      .string("HASIL 2")
     var users = await User.find({'metas.school._id':req.params.school_id})
-    res.json(users)
+    var school = await School.findById(req.params.school_id)
+    users = JSON.stringify(users)
+    users = JSON.parse(users)
+    for(var i=0;i<users.length;i++)
+    {
+        var n = i+1;
+        var row = i+2;
+        ws.cell(row, 1).number(n)
+        var participant = users[i]
+        var user = await User.findById(users[i]._id)
+        if(!user) continue
+        user = JSON.stringify(user)
+        user = JSON.parse(user)
+        // delete user.metas.sequences
+        delete user.metas.school
+        // delete user.sequences
+        ws.cell(row, 2).string(user.name)
+        var sequences = user.metas.sequences
+        if(typeof sequences === 'undefined'){
+            ws.cell(row, 3).number(0)
+            ws.cell(row, 4).number(0)
+            ws.cell(row, 5).number(0)
+            ws.cell(row, 6).number(0)
+            ws.cell(row, 7).number(0)
+            ws.cell(row, 8).number(0)
+            ws.cell(row, 9).number(0)
+            ws.cell(row, 10).number(0)
+            ws.cell(row, 11).number(0)
+            ws.cell(row, 12).number(0)
+            continue
+        } 
+        var subtest = 3, IPS = 0, IPA = 0, BAHASA1 = 0, BAHASA2 = 0, hasil1 = "", hasil2 = ""
+        for (var j = 0; j < sequences.length; j++) 
+        {
+            var quis = j+1
+            if(quis%2 != 0) continue;
+            var sequence = sequences[j].contents
+            var nilai = 0
+            for(var k = 0; k < sequence.length; k++)
+            {
+                var content = sequence[k]
+                // if(content.childs.length == 0) continue;
+                if(typeof content.selected === 'undefined') continue
+                var selected = content.selected
+                var post = await Post.findById(selected)
+                if(post && post.type_as == "correct answer") nilai++
+            }
+            // user.nilai.push({
+            //     title:sequences[j].title,
+            //     nilai:nilai
+            // })
+            // user[""+sequences[j].title] = nilai
+            if(subtest <= 4) BAHASA1+=nilai
+            if(subtest == 5 || subtest == 6) BAHASA2+=nilai
+            if(subtest <= 6) IPS+=nilai
+            if(subtest >= 7) IPA+=nilai
+            ws.cell(row, subtest).number(nilai)
+            subtest++
+        }
+        hasil1 = IPS > IPA ? "IPS" : "IPA"
+        hasil1 = IPS == IPA ? "?" : hasil1
+        hasil2 = BAHASA1 < BAHASA2 ? "BAHASA" : ""
+ 
+        ws.cell(row, 11).string(hasil1)
+        ws.cell(row, 12).string(hasil2)
+    }
+     
+    // Create a reusable style
+    // var style = wb.createStyle({
+    //   font: {
+    //     color: '#FF0800',
+    //     size: 12,
+    //   },
+    //   numberFormat: '$#,##0.00; ($#,##0.00); -',
+    // });
+     
+    // // Set value of cell A1 to 100 as a number type styled with paramaters of style
+    // ws.cell(2, 1)
+    //   .number(100)
+     
+    // // Set value of cell B1 to 200 as a number type styled with paramaters of style
+    // ws.cell(2, 2)
+    //   .number(200)
+     
+    // // Set value of cell C1 to a formula styled with paramaters of style
+    // ws.cell(2, 3)
+    //   .formula('A1 + B1')
+     
+    // // Set value of cell A2 to 'string' styled with paramaters of style
+    // ws.cell(3, 1)
+    //   .string('string')
+     
+    // // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
+    // ws.cell(4, 1)
+    //   .bool(true)
+     
+    wb.write('uploads/'+school.name+'.xlsx');
+
+    res.json({file:'uploads/'+school.name+'.xlsx'});
 }
 
 exports.getParticipantsActive = async (req, res) => {
@@ -381,12 +501,17 @@ exports.getParticipantsActive = async (req, res) => {
     var reports = []
     for(var i=0;i<users.length;i++)
     {
-        var user = users[i]
+        var participant = users[i]
+        var user = await User.findById(users[i]._id)
+        if(!user) continue
+        user = JSON.stringify(user)
+        user = JSON.parse(user)
         // delete user.metas.sequences
         delete user.metas.school
         // delete user.sequences
         var sequences = user.metas.sequences
         if(typeof sequences === 'undefined'){
+            user.metas.NISN = participant.nis
             reports.push(user)
             continue
         } 

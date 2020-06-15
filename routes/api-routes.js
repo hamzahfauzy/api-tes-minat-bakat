@@ -23,6 +23,9 @@ var sequenceController = require('./../applications/controllers/SequenceControll
 router.get('/uploads/:img', (req, res) => {
     res.sendFile(path.join(__dirname, "../uploads/"+req.params.img));
 });
+
+router.get('/exams/report/:school_id',examController.report)
+
 router.post('/login', userController.login)
 router.post('/register-admin', userController.register)
 
@@ -81,7 +84,6 @@ router.route('/exams')
     .post(examController.new);
 
 router.get('/exams/getParticipantsActive/:school_id',examController.getParticipantsActive)
-router.get('/exams/report/:school_id',examController.report)
 
 router.post('/exams/:exam_id/duplicate',examController.duplicate)
 router.post('/exams/:exam_id/add-sequence',examController.addSequence)

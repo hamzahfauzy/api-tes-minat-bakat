@@ -192,7 +192,8 @@ exports.update = function (req, res) {
             var user = await User.findOneAndUpdate({
                 _id:val._id,
             },{
-                metas: metas,
+                $set:{"metas.school":school,"metas.exam_id":exam._id}
+                // metas: metas,
             })
             participants.push({
                 _id:user._id,

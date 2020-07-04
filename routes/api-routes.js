@@ -25,6 +25,7 @@ router.get('/uploads/:img', (req, res) => {
 });
 
 router.get('/exams/report/:exam_id',examController.report)
+router.get('/exams/berita-acara/:exam_id',examController.printacara)
 
 router.post('/login', userController.login)
 router.post('/register-admin', userController.register)

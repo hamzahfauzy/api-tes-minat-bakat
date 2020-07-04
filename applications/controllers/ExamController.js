@@ -195,6 +195,7 @@ exports.update = function (req, res) {
                 $set:{"metas.school":school,"metas.exam_id":exam._id}
                 // metas: metas,
             })
+            if(!user) continue
             participants.push({
                 _id:user._id,
                 nis:val.nis,
@@ -496,6 +497,179 @@ exports.report = async (req,res) => {
     res.json({file:'uploads/'+school.name+'.xlsx'});
 }
 
+exports.beritaacara = async (req,res) => {
+    // Create a new instance of a Workbook class
+    var wb = new xl.Workbook();
+    // Add Worksheets to the workbook
+    var ws = wb.addWorksheet('Sheet 1');
+
+    var dt = new Date();
+    // var end_time = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`
+
+    var exam = await Exam.findById(req.params.exam_id)
+    var users = exam.participants
+    var school = await School.findById(exam.school_id)
+
+    ws.cell(1, 1, 1, 5, true)
+      .string(`DAFTAR PESERTA YANG MENGIKUTI TES PEMINATAN ONLINE (TPO)`)
+
+    ws.cell(2, 1)
+      .string(`HARI/TANGGAL : ${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')}`)
+    ws.cell(3, 1)
+      .string(`WAKTU : ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`)
+    ws.cell(4, 1)
+      .string(`ASAL SEKOLAH : ${school.name}`)
+
+    ws.cell(5, 1)
+      .string("No")
+    ws.cell(5, 2)
+      .string("NAMA")
+    ws.cell(5, 3)
+      .string("WAKTU MULAI")
+    ws.cell(5, 4)
+      .string("WAKTU SELESAI")
+    ws.cell(5, 5)
+      .string("KETERANGAN")
+    
+    users = JSON.stringify(users)
+    users = JSON.parse(users)
+    for(var i=0;i<users.length;i++)
+    {
+        var participant = users[i]
+        var user = await User.findById(users[i]._id)
+        if(!user) continue
+        if(user.name == undefined) continue 
+        
+        var n = i+1;
+        var row = i+6;
+        ws.cell(row, 1).number(n)
+        
+        user = JSON.stringify(user)
+        user = JSON.parse(user)
+        // delete user.metas.sequences
+        delete user.metas.school
+        // delete user.sequences
+        
+        ws.cell(row, 2).string(user.name)
+        ws.cell(row, 3).string(user.metas.start_time !== undefined ? user.metas.start_time : '')
+        ws.cell(row, 4).string(user.metas.end_time !== undefined ? user.metas.end_time : '')
+        ws.cell(row, 5).string(user.metas.end_time !== undefined ? "Selesai" : "Sedang Mengerjakan")
+    }
+     
+    // Create a reusable style
+    // var style = wb.createStyle({
+    //   font: {
+    //     color: '#FF0800',
+    //     size: 12,
+    //   },
+    //   numberFormat: '$#,##0.00; ($#,##0.00); -',
+    // });
+     
+    // // Set value of cell A1 to 100 as a number type styled with paramaters of style
+    // ws.cell(2, 1)
+    //   .number(100)
+     
+    // // Set value of cell B1 to 200 as a number type styled with paramaters of style
+    // ws.cell(2, 2)
+    //   .number(200)
+     
+    // // Set value of cell C1 to a formula styled with paramaters of style
+    // ws.cell(2, 3)
+    //   .formula('A1 + B1')
+     
+    // // Set value of cell A2 to 'string' styled with paramaters of style
+    // ws.cell(3, 1)
+    //   .string('string')
+     
+    // // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
+    // ws.cell(4, 1)
+    //   .bool(true)
+     
+    wb.write('uploads/berita-acara-'+school.name+'.xlsx');
+
+    res.json({file:'uploads/berita-acara-'+school.name+'.xlsx'});
+}
+
+exports.printacara = async (req,res) => {
+    var dt = new Date();
+    // var end_time = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`
+
+    var exam = await Exam.findById(req.params.exam_id)
+    var users = exam.participants
+    var school = await School.findById(exam.school_id)
+    
+    users = JSON.stringify(users)
+    users = JSON.parse(users)
+    var rows = "";
+    for(var i=0;i<users.length;i++)
+    {
+        var participant = users[i]
+        var user = await User.findById(users[i]._id)
+        if(!user) continue
+        if(user.name == undefined) continue 
+        var n = i+1;
+
+        user = JSON.stringify(user)
+        user = JSON.parse(user)
+        // delete user.metas.sequences
+        delete user.metas.school
+        // delete user.sequences
+        
+        rows += `
+            <tr>
+                <td>${n}</td>
+                <td>${user.name}</td>
+                <td>${user.username}</td>
+                <td>${user.metas.start_time !== undefined ? user.metas.start_time : ''}</td>
+                <td>${user.metas.end_time !== undefined ? user.metas.end_time : ''}</td>
+                <td>${user.metas.end_time !== undefined ? "Selesai" : "Sedang Mengerjakan"}</td>
+            </tr>
+        `      
+    }
+
+    var html_response = "<h2 align='center'>DAFTAR PESERTA YANG MENGIKUTI TES PEMINATAN ONLINE (TPO)</h2>"
+
+    html_response += "<br>"
+    html_response += `
+    <table>
+        <tr>
+            <td>HARI/TANGGAL</td>
+            <td>:</td>
+            <td>${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')}</td>
+        </tr>
+        <tr>
+            <td>WAKTU</td>
+            <td>:</td>
+            <td>${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}</td>
+        </tr>
+        <tr>
+            <td>ASAL SEKOLAH</td>
+            <td>:</td>
+            <td>${school.name}</td>
+        </tr>
+    </table>
+    <br>
+    <table width="100%" border="1" cellspacing="0" cellpadding="5">
+        <tr style="background-color:#eaeaea;">
+            <th rowspan="2">No</th>
+            <th rowspan="2">NAMA</th>
+            <th rowspan="2">NISN</th>
+            <th colspan="2" style="text-align:center">WAKTU TEST</th>
+            <th rowspan="2">KETERANGAN</th>
+        </tr>
+        <tr style="background-color:#eaeaea;">
+            <th style="text-align:center">MULAI</th>
+            <th style="text-align:center">SELESAI</th>
+        </tr>
+        ${rows}
+    </table>
+    <script>window.print()</script>
+    `
+
+    res.type("text/html");
+    res.send(html_response);
+}
+
 exports.getParticipantsActive = async (req, res) => {
     var users = await User.find({'metas.school._id':req.params.school_id})
     users = JSON.stringify(users)
@@ -596,9 +770,14 @@ exports.startExam = async (req, res) => {
         sequence.contents = contents
         sequences.push(sequence)
     }
+    
+    var dt = new Date();
+    var start_time = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`
+
     sequences = sequences.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0))
     metas.sequences = sequences
     metas.seqActive = 0
+    metas.start_time = start_time
     var userUpdate = await User.findOneAndUpdate({
         _id: req.user._id,
     },{
@@ -633,8 +812,11 @@ exports.sendUserSequence = async (req, res) => {
 exports.finishExam = async (req, res) => {
     var user = await User.findById(req.user._id)
     var metas = JSON.stringify(user.metas)
+    var dt = new Date();
+    var end_time = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`
     metas = JSON.parse(metas)
     metas.exam_finished = true
+    metas.end_time = end_time
     var userUpdate = await User.findOneAndUpdate({
         _id: req.user._id,
     },{

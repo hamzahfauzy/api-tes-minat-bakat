@@ -12,6 +12,12 @@ router.get('/', function (req, res) {
     });
 });
 
+router.get('/get-date-time', (req, res) => {
+    var dt = new Date()
+    var _time = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`
+    res.send(_time)
+})
+
 var userController = require('./../applications/controllers/UserController');
 var categoryController = require('./../applications/controllers/CategoryController');
 var schoolController = require('./../applications/controllers/SchoolController');

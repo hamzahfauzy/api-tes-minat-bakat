@@ -685,7 +685,7 @@ exports.printacara = async (req,res) => {
 
         user = JSON.stringify(user)
         user = JSON.parse(user)
-        // delete user.metas.sequences
+        delete user.metas.sequences
         delete user.metas.school
         // delete user.sequences
         

@@ -446,7 +446,7 @@ exports.addSequence = async (req,res) => {
     });
 }
 
-exports.report = async (req,res) => {
+exports.report2 = async (req,res) => {
     // Create a new instance of a Workbook class
     var wb = new xl.Workbook();
     // Add Worksheets to the workbook
@@ -664,6 +664,168 @@ exports.beritaacara = async (req,res) => {
     res.json({file:'uploads/berita-acara-'+school.name+'.xlsx'});
 }
 
+exports.report = async (req,res) => {
+    // Create a new instance of a Workbook class
+    
+    var exam = await Exam.findById(req.params.exam_id)
+    var users = exam.participants
+    var school = await School.findById(exam.school_id)
+    users = JSON.stringify(users)
+    users = JSON.parse(users)
+    var rows = ""
+    for(var i=0;i<users.length;i++)
+    {
+        var n = i+1;
+        rows += "<tr><td>"+n+"</td>"
+        var row = i+2;
+        var participant = users[i]
+        var user = await User.findById(users[i]._id)
+        if(!user) continue
+        user = JSON.stringify(user)
+        user = JSON.parse(user)
+        // delete user.metas.sequences
+        delete user.metas.school
+        // delete user.sequences
+        rows += "<td>"+user.name+"</td>"
+        rows += "<td>"+user.username+"</td>"
+        rows += "<td>"+(user.metas.tempat_tanggal_lahir !== undefined ? user.metas.tempat_tanggal_lahir : '')+"</td>"
+        rows += "<td>"+(user.metas.jurusan !== undefined ? user.metas.jurusan : '')+"</td>"
+        var sequences = user.metas.sequences
+        if(typeof sequences === 'undefined'){
+            rows += "<td></td>"
+            rows += "<td></td>"
+            rows += "<td></td>"
+            rows += "<td></td>"
+            rows += "<td></td>"
+            rows += "<td></td>"
+            rows += "<td></td>"
+            rows += "<td></td></tr>"
+            continue
+        } 
+        var subtest = 3, IPS = 0, IPA = 0, BAHASA1 = 0, BAHASA2 = 0, hasil1 = "", hasil2 = ""
+        for (var j = 0; j < sequences.length; j++) 
+        {
+            var quis = j+1
+            if(quis%2 != 0) continue;
+            var sequence = sequences[j].contents
+            var nilai = 0
+            for(var k = 0; k < sequence.length; k++)
+            {
+                var content = sequence[k]
+                // if(content.childs.length == 0) continue;
+                if(typeof content.selected === 'undefined') continue
+                var selected = content.selected
+                var post = await Post.findById(selected)
+                if(post && post.type_as == "correct answer") nilai++
+            }
+            // user.nilai.push({
+            //     title:sequences[j].title,
+            //     nilai:nilai
+            // })
+            // user[""+sequences[j].title] = nilai
+            if(subtest <= 4) BAHASA1+=nilai
+            if(subtest == 5 || subtest == 6) BAHASA2+=nilai
+            if(subtest <= 6) IPS+=nilai
+            if(subtest >= 7) IPA+=nilai
+            subtest++
+        }
+        hasil1 = IPS > IPA ? "IPS" : "IPA"
+        hasil1 = IPS == IPA ? "PENYESUAIAN" : hasil1
+        hasil2 = BAHASA1 < BAHASA2 ? "BAHASA" : BAHASA1 == BAHASA2 ? "PENYESUAIAN" : ""
+        var total = (IPA+IPS)
+        var potensi = total <= 29 ? "SANGAT RENDAH" : total >= 30 && total <= 61 ? "RENDAH" : total >= 62 && total <= 93 ? "SEDANG" : total >= 94 && total <= 126 ? "TINGGI" : "SANGAT TINGGI"
+        rows += "<td>"+BAHASA1+"</td>"
+        rows += "<td>"+BAHASA2+"</td>"
+        rows += "<td>"+(BAHASA1+BAHASA2)+"</td>"
+        rows += "<td>"+IPA+"</td>"
+        rows += "<td>"+total+"</td>"
+        rows += "<td>"+potensi+"</td>"
+        rows += "<td>"+hasil1+"</td>"
+        rows += "<td>"+hasil2+"</td></tr>"
+    }
+
+    var html_response = "<title>LAPORAN TES "+school.name+"</title>"
+
+    html_response += "<br>"
+    html_response += `<div>
+    <!--
+    <table>
+        <tr>
+            <td>NAMA SEKOLAH</td>
+            <td>:</td>
+            <td>${school.name}</td>
+        </tr>
+        <tr>
+            <td>TANGGAL PELAKSANAAN TPO</td>
+            <td>:</td>
+            <td>${exam.start_time}</td>
+        </tr>
+        
+    </table>
+    <button onclick="tableToExcel('report', '${school.name}')">Export</button>
+    -->
+    <br>
+    <table id="report" width="100%" border="1" cellspacing="0" cellpadding="5">
+        <tr style="border:0px">
+            <td style="border:0px" colspan="3">NAMA SEKOLAH</td>
+            <td style="border:0px">:</td>
+            <td style="border:0px">${school.name}</td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+        </tr>
+        <tr style="border:0px">
+            <td style="border:0px" colspan="3">TANGGAL PELAKSANAAN TPO</td>
+            <td style="border:0px">:</td>
+            <td style="border:0px">${exam.start_time.split('T')[0]}</td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+            <td style="border:0px"></td>
+        </tr>
+        <tr style="background-color:#eaeaea;">
+            <th rowspan="3" style="text-align:center">NO</th>
+            <th rowspan="3" style="text-align:center">NAMA</th>
+            <th rowspan="3" style="text-align:center">NISN</th>
+            <th rowspan="3" style="text-align:center">TEMPAT, TANGGAL LAHIR</th>
+            <th rowspan="3" style="text-align:center">MINAT</th>
+            <th colspan="5" style="text-align:center">HASIL TES</th>
+            <th rowspan="3" style="text-align:center">POTENSI AKADEMIK</th>
+            <th rowspan="3" style="text-align:center">JURUSAN 1</th>
+            <th rowspan="3" style="text-align:center">JURUSAN 2</th>
+        </tr>
+        <tr style="background-color:#eaeaea;">
+            <th style="text-align:center" colspan="3">IPS</th>
+            <th style="text-align:center" rowspan="2">IPA</th>
+            <th style="text-align:center" rowspan="2">TOTAL</th>
+        </tr>
+        <tr style="background-color:#eaeaea;">
+            <th style="text-align:center">1 & 2</th>
+            <th style="text-align:center">3 & 4</th>
+            <th style="text-align:center">TOTAL</th>
+        </tr>
+        ${rows}
+    </table></div>
+    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <script src="/api/uploads/tableToExcel.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        tableToExcel('report', '${school.name}')
+    </script> 
+    `
+
+    res.type("text/html");
+    res.send(html_response);
+}
+
 exports.printacara = async (req,res) => {
     var dt = new Date();
     // var end_time = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear().toString().padStart(4, '0')} ${dt.getHours().toString().padStart(2, '0')}:${dt.getMinutes().toString().padStart(2, '0')}:${dt.getSeconds().toString().padStart(2, '0')}`
@@ -688,7 +850,7 @@ exports.printacara = async (req,res) => {
         delete user.metas.sequences
         delete user.metas.school
         // delete user.sequences
-        var stts = user.metas.end_time !== undefined ? "Selesai" : user.metas.start_time == undefined && user.metas.end_time == undefined ? "" : "Sedang Mengerjakan"
+        var stts = user.metas.end_time !== undefined ? "Selesai" : user.metas.start_time == undefined ? "" : "Sedang Mengerjakan"
         // var stts = user.metas.start_time !== undefined ? "Selesai" : ""
         rows += `
             <tr>

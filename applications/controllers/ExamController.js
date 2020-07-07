@@ -13,71 +13,95 @@ const readXlsxFile = require('read-excel-file/node')
 var xl = require('excel4node');
 
 // Handle index actions
-exports.index = function (req, res) {
-    Exam.get(async function (err, exams) {
-        if (err) {
+exports.index = async function (req, res) {
+    try 
+    {
+        let exams = await Exam.find({}).select('-participants')
+        if(exams)
+            res.json({
+                status: "success",
+                message: "exams retrieved successfully",
+                data: await exams
+            });
+        else
             res.json({
                 status: "error",
-                message: err,
+                message: "exam not found",
             });
-            return
-        }
-
-        var _exams = JSON.stringify(exams)
-        _exams = JSON.parse(_exams)
-
-        for(var h=0;h<_exams.length;h++){
-            var users = _exams[h].participants
-            var reports = []
-            for(var i=0;i<users.length;i++)
-            {
-                var participant = users[i]
-                var user = await User.findById(users[i]._id)
-                if(!user) continue
-                user = JSON.stringify(user)
-                user = JSON.parse(user)
-                // delete user.metas.sequences
-                delete user.metas.school
-                // delete user.sequences
-                var sequences = user.metas.sequences
-                if(typeof sequences === 'undefined'){
-                    user.metas.NISN = participant.nis
-                    reports.push(user)
-                    continue
-                } 
-                for (var j = 0; j < sequences.length; j++) 
-                {
-                    var quis = j+1
-                    if(quis%2 != 0) continue;
-                    var sequence = sequences[j].contents
-                    var nilai = 0
-                    for(var k = 0; k < sequence.length; k++)
-                    {
-                        var content = sequence[k]
-                        // if(content.childs.length == 0) continue;
-                        if(typeof content.selected === 'undefined') continue
-                        var selected = content.selected
-                        var post = await Post.findById(selected)
-                        if(post && post.type_as == "correct answer") nilai++
-                    }
-                    // user.nilai.push({
-                    //     title:sequences[j].title,
-                    //     nilai:nilai
-                    // })
-                    user[""+sequences[j].title] = nilai
-                }
-                delete user.metas.sequences
-                reports.push(user)
-            }
-            _exams[h].participants = reports
-        }
-
+    }
+    catch(err)
+    {
         res.json({
-            status: "success",
-            message: "Exam retrieved successfully",
-            data: _exams
+            status: "error",
+            message: err.stack,
         });
-    });
+    }
+    return
+    // Exam.get(async function (err, exams) {
+    //     if (err) {
+    //         res.json({
+    //             status: "error",
+    //             message: err,
+    //         });
+    //         return
+    //     }
+
+    //     var _exams = JSON.stringify(exams)
+    //     _exams = JSON.parse(_exams)
+    //     delete exams.participants
+
+    //     for(var h=0;h<_exams.length;h++){
+    //         var users = _exams[h].participants
+    //         var reports = []
+    //         for(var i=0;i<users.length;i++)
+    //         {
+    //             var participant = users[i]
+    //             var user = await User.findById(users[i]._id)
+    //             if(!user) continue
+    //             user = JSON.stringify(user)
+    //             user = JSON.parse(user)
+    //             // delete user.metas.sequences
+    //             delete user.metas.school
+    //             // delete user.sequences
+    //             var sequences = user.metas.sequences
+    //             if(typeof sequences === 'undefined'){
+    //                 user.metas.NISN = participant.nis
+    //                 reports.push(user)
+    //                 continue
+    //             } 
+    //             for (var j = 0; j < sequences.length; j++) 
+    //             {
+    //                 var quis = j+1
+    //                 if(quis%2 != 0) continue;
+    //                 var sequence = sequences[j].contents
+    //                 var nilai = 0
+    //                 for(var k = 0; k < sequence.length; k++)
+    //                 {
+    //                     var content = sequence[k]
+    //                     // if(content.childs.length == 0) continue;
+    //                     if(typeof content.selected === 'undefined') continue
+    //                     var selected = content.selected
+    //                     var post = await Post.findById(selected)
+    //                     if(post && post.type_as == "correct answer") nilai++
+    //                 }
+    //                 // user.nilai.push({
+    //                 //     title:sequences[j].title,
+    //                 //     nilai:nilai
+    //                 // })
+    //                 user[""+sequences[j].title] = nilai
+    //             }
+    //             delete user.metas.sequences
+    //             reports.push(user)
+    //         }
+    //         _exams[h].participants = reports
+    //     }
+
+    //     res.json({
+    //         status: "success",
+    //         message: "Exam retrieved successfully",
+    //         data: _exams
+    //     });
+    // });
 };
 
 // Handle create user actions
@@ -162,15 +186,65 @@ exports.duplicate = function (req, res) {
 };
 
 // Handle view user info
-exports.view = function (req, res) {
-    Exam.findById(req.params.exam_id, function (err, exam) {
-        if (err)
-            res.send(err);
-        res.json({
-            message: 'Exam detail loading..',
-            data: exam
-        });
+exports.view = async function (req, res) {
+    var exam = await Exam.findById(req.params.exam_id)
+    var _exam = JSON.stringify(exam)
+        _exam = JSON.parse(_exam)
+    var users = _exam.participants
+    var reports = []
+    for(var i=0;i<users.length;i++)
+    {
+        var participant = users[i]
+        var user = await User.findById(users[i]._id)
+        if(!user) continue
+        user = JSON.stringify(user)
+        user = JSON.parse(user)
+        // delete user.metas.sequences
+        delete user.metas.school
+        // delete user.sequences
+        var sequences = user.metas.sequences
+        if(typeof sequences === 'undefined'){
+            user.metas.NISN = participant.nis
+            reports.push(user)
+            continue
+        } 
+        for (var j = 0; j < sequences.length; j++) 
+        {
+            var quis = j+1
+            if(quis%2 != 0) continue;
+            var sequence = sequences[j].contents
+            var nilai = 0
+            for(var k = 0; k < sequence.length; k++)
+            {
+                var content = sequence[k]
+                // if(content.childs.length == 0) continue;
+                if(typeof content.selected === 'undefined') continue
+                var selected = content.selected
+                var post = await Post.findById(selected)
+                if(post && post.type_as == "correct answer") nilai++
+            }
+            // user.nilai.push({
+            //     title:sequences[j].title,
+            //     nilai:nilai
+            // })
+            user[""+sequences[j].title] = nilai
+        }
+        delete user.metas.sequences
+        reports.push(user)
+    }
+    _exam.participants = reports
+    res.json({
+        message: 'Exam detail loading..',
+        data: _exam
     });
+    // Exam.findById(req.params.exam_id, function (err, exam) {
+    //     if (err)
+    //         res.send(err);
+    //     res.json({
+    //         message: 'Exam detail loading..',
+    //         data: exam
+    //     });
+    // });
 };
 
 exports.update = function (req, res) {

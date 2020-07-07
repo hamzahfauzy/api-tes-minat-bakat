@@ -688,7 +688,7 @@ exports.printacara = async (req,res) => {
         delete user.metas.sequences
         delete user.metas.school
         // delete user.sequences
-        
+        var stts = user.metas.end_time !== undefined ? "Selesai" : user.metas.start_time !== undefined && user.metas.end_time == undefined ? "" : "Sedang Mengerjakan"
         rows += `
             <tr>
                 <td>${n}</td>
@@ -696,7 +696,7 @@ exports.printacara = async (req,res) => {
                 <td>${user.username}</td>
                 <td>${user.metas.start_time !== undefined ? user.metas.start_time : ''}</td>
                 <td>${user.metas.end_time !== undefined ? user.metas.end_time : ''}</td>
-                <td>${user.metas.end_time !== undefined ? "Selesai" : "Sedang Mengerjakan"}</td>
+                <td>${stts}</td>
             </tr>
         `      
     }

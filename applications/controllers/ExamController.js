@@ -701,7 +701,7 @@ exports.printacara = async (req,res) => {
         `      
     }
 
-    var html_response = "<h2 align='center'>DAFTAR PESERTA YANG MENGIKUTI TES PEMINATAN ONLINE (TPO)</h2>"
+    var html_response = "<title>BERITA ACARA "+school.name+"</title><h2 align='center'>DAFTAR PESERTA YANG MENGIKUTI TES PEMINATAN ONLINE (TPO)</h2>"
 
     html_response += "<br>"
     html_response += `

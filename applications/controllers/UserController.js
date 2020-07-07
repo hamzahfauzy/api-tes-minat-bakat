@@ -9,7 +9,7 @@ const config = require("config");
 exports.index = async function (req, res) {
     try 
     {
-        let users = await User.find({$or:[ {isAdmin : { '$exists' : false }}, {isAdmin:false}]})
+        let users = await User.find({$or:[ {isAdmin : { '$exists' : false }}, {isAdmin:false}]}).select('-metas')
         if(users)
             res.json({
                 status: "success",

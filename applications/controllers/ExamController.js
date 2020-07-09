@@ -733,7 +733,7 @@ exports.report = async (req,res) => {
         hasil1 = IPS == IPA ? "PENYESUAIAN" : hasil1
         hasil2 = BAHASA1 < BAHASA2 ? "BAHASA" : BAHASA1 == BAHASA2 ? "PENYESUAIAN" : ""
         var total = (IPA+IPS)
-        var potensi = total <= 29 ? "SANGAT RENDAH" : total >= 30 && total <= 61 ? "RENDAH" : total >= 62 && total <= 93 ? "SEDANG" : total >= 94 && total <= 126 ? "TINGGI" : "SANGAT TINGGI"
+        var potensi = total <= 39 ? "SANGAT RENDAH" : total >= 40 && total <= 59 ? "RENDAH" : total >= 60 && total <= 79 ? "SEDANG" : total >= 80 && total <= 99 ? "TINGGI" : "SANGAT TINGGI"
         rows += "<td>"+BAHASA1+"</td>"
         rows += "<td>"+BAHASA2+"</td>"
         rows += "<td>"+(BAHASA1+BAHASA2)+"</td>"

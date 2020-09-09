@@ -839,7 +839,7 @@ exports.printacara = async (req,res) => {
     var rows = "";
     for(var i=0;i<users.length;i++)
     {
-        var participant = users[i]
+        // var participant = users[i]
         var user = await User.findById(users[i]._id)
         if(!user) continue
         if(user.name == undefined) continue 
@@ -864,7 +864,7 @@ exports.printacara = async (req,res) => {
         `      
     }
 
-    var html_response = "<title>BERITA ACARA "+school.name+"</title><h2 align='center'>DAFTAR PESERTA YANG MENGIKUTI TES PEMINATAN ONLINE (TPO)</h2>"
+    var html_response = "<title>BERITA ACARA "+school.name+"</title><div id='report'><h2 align='center'>DAFTAR PESERTA YANG MENGIKUTI TES PEMINATAN ONLINE (TPO)</h2>"
 
     html_response += "<br>"
     html_response += `
@@ -899,8 +899,13 @@ exports.printacara = async (req,res) => {
             <th style="text-align:center">SELESAI</th>
         </tr>
         ${rows}
-    </table>
-    <script>window.print()</script>
+    </table></div>
+    <script>// window.print()</script>
+    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <script src="/api/uploads/tableToExcel.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        tableToExcel('report', '${school.name}')
+    </script> 
     `
 
     res.type("text/html");

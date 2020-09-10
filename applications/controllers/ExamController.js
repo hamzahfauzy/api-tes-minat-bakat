@@ -834,9 +834,10 @@ exports.printacara = async (req,res) => {
     var users = exam.participants
     var school = await School.findById(exam.school_id)
 
-    console.log(school)
+    console.log({school,exam})
 
     res.send("Hello")
+    return
     
     users = JSON.stringify(users)
     users = JSON.parse(users)
